@@ -8,6 +8,15 @@
   var fans = [], crews = {}, weekly = {}, online = {}, me = null;
   var tab = "place", sel = null, map = null, channel = null;
 
+  /* kinek küldtünk már jelentést ebből a böngészőből */
+  var reported = (function () {
+    try { return JSON.parse(localStorage.getItem("gta6hu_reported") || "{}"); } catch (e) { return {}; }
+  })();
+  function rememberReported(id) {
+    reported[id] = 1;
+    try { localStorage.setItem("gta6hu_reported", JSON.stringify(reported)); } catch (e) { }
+  }
+
   /* ---------------- térkép ---------------- */
   var tip = $("tip");
   map = w.GTAMap.create({
@@ -185,16 +194,45 @@
     $("cityName").textContent = pl ? pl.label : "Hely";
     $("cityList").innerHTML = list.length ? list.map(function (f, i) {
       var cw = f.crew_id && crews[f.crew_id];
+      var mine = me && me.id === f.id;
       return "<li><span class=\"rk\">" + (i + 1) + "</span>" +
         '<span class="nm">' + (online[f.id] ? '<span class="crewdot" style="background:#5ad2a0"></span>' : "") +
         esc(f.nick) + " " + rankTag(f.hours) + "<em>" + esc(C.platLabel(f.platform)) +
         (cw ? " · " + esc(cw.name) : "") + (f.note ? " · " + esc(f.note) : "") + "</em></span>" +
-        '<span class="vl">' + nf(f.hours) + " ó</span></li>";
+        '<span class="vl">' + nf(f.hours) + " ó" +
+        (mine ? "" : (reported[f.id]
+          ? '<em class="flag done">jelentve</em>'
+          : '<button class="flag" type="button" data-fan="' + esc(f.id) + '" data-nick="' + esc(f.nick) + '">jelentés</button>')) +
+        "</span></li>";
     }).join("") : '<li style="grid-template-columns:1fr"><span class="nm" style="font-weight:400;color:var(--muted)">Itt még nincs bejelölt rajongó.</span></li>';
     $("cityPanel").hidden = false;
     if (!keep) $("cityPanel").scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
   $("cityClose").onclick = function () { sel = null; map.select(null); $("cityPanel").hidden = true; };
+
+  /* ---------------- jelentés ---------------- */
+  var repTarget = null;
+  $("cityList").addEventListener("click", function (e) {
+    var b = e.target.closest("button.flag");
+    if (!b) return;
+    repTarget = b.getAttribute("data-fan");
+    $("repWho").textContent = "Bejelentett rajongó: " + b.getAttribute("data-nick");
+    $("repErr").textContent = "";
+    $("repDlg").showModal();
+  });
+  $("repCancel").onclick = function () { $("repDlg").close(); };
+  $("repForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!repTarget) { $("repDlg").close(); return; }
+    api.report(repTarget, $("repReason").value, $("repNote").value)
+      .then(function () {
+        rememberReported(repTarget);
+        $("repNote").value = "";
+        $("repDlg").close();
+        if (sel) openPlace(sel, true);
+      })
+      .catch(function (err) { $("repErr").textContent = C.humanError(err); });
+  });
 
   /* ---------------- saját kártya ---------------- */
   function renderMine() {

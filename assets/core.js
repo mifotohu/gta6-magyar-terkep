@@ -42,7 +42,12 @@
     ELOBB_JELOLD_BE_MAGAD: "Előbb jelöld be magad a térképen, utána alapíthatsz crew-t.",
     FOGLALT_CREW_NEV: "Ez a crew-név már foglalt.",
     ROSSZ_CREW_NEV: "A crew neve 2 és 24 karakter között legyen.",
-    HIANYZO_TOKEN: "A böngésződ nem engedi a helyi tárolást, így a bejelölés nem menthető."
+    HIANYZO_TOKEN: "A böngésződ nem engedi a helyi tárolást, így a bejelölés nem menthető.",
+    TUL_SOK_JELENTES: "Erről a hálózatról ma már sok jelentés érkezett. Holnap újra megy.",
+    NINCS_ILYEN: "Ez a bejegyzés már nincs meg.",
+    NINCS_JOGOSULTSAG: "Hibás jelszó.",
+    MAR_VAN_ADMIN: "Az admin jelszó már be van állítva.",
+    ROVID_JELSZO: "A jelszó legalább 12 karakter legyen."
   };
   function humanError(err) {
     if (!err) return "Ismeretlen hiba.";
@@ -131,6 +136,50 @@
       need();
       return sb.rpc("create_crew", { p_token: token(), p_name: name, p_color: color })
         .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+
+    report: function (fanId, reason, note) {
+      need();
+      return sb.rpc("report_fan", { p_fan_id: fanId, p_reason: reason, p_note: note || null })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+
+    /* --- moderáció --- */
+    adminExists: function () {
+      need();
+      return sb.rpc("admin_exists").then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+    adminSetup: function (key) {
+      need();
+      return sb.rpc("admin_setup", { p_key: key }).then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+    adminOk: function (key) {
+      need();
+      return sb.rpc("admin_ok", { p_key: key }).then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+    adminReports: function (key) {
+      need();
+      return sb.rpc("admin_reports", { p_key: key }).then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+    adminFans: function (key) {
+      need();
+      return sb.rpc("admin_fans", { p_key: key }).then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+    adminCrews: function (key) {
+      need();
+      return sb.rpc("admin_crews", { p_key: key }).then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+    adminDeleteFan: function (key, id) {
+      need();
+      return sb.rpc("admin_delete_fan", { p_key: key, p_fan_id: id }).then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+    adminDeleteCrew: function (key, id) {
+      need();
+      return sb.rpc("admin_delete_crew", { p_key: key, p_crew_id: id }).then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+    adminClearReports: function (key, id) {
+      need();
+      return sb.rpc("admin_clear_reports", { p_key: key, p_fan_id: id }).then(function (r) { if (r.error) throw r.error; return r.data; });
     },
 
     /* élő csatorna: jelenlét + változás-értesítés */

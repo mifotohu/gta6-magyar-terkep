@@ -14,6 +14,7 @@ Take-Two Interactive-val.
 | `index.html` | A térkép, a bejelölő űrlap, toplisták, crew-k, ID-kártya, beágyazó kód |
 | `stats.html` | Napi összóra-görbe, hőtérkép, megye-verseny, platform- és rangmegoszlás |
 | `embed.html` | Beágyazható mini-térkép `<iframe>`-be, csak olvas |
+| `admin.html` | Moderáció: jelentések, rajongók, crew-k — admin jelszóval |
 
 Funkciók: pontok városonként/kerületenként csoportosítva, zoom és húzás, Budapest-nagyítás
 a 23 kerülethatárral, hőtérkép 10 000 lakosra vetítve, heti óraszám-változás,
@@ -52,6 +53,9 @@ a tokent ellenőrzi. A táblákba közvetlenül senki nem írhat.
 | `crews` | klánok névvel és színnel |
 | `crew_secrets` | a crew alapítójának tokenje |
 | `hour_log` | minden óraszám-változás, automatikus trigger írja |
+| `reports` | jelentések (ok, megjegyzés, IP-lenyomat); az API-n át olvashatatlan |
+| `admin_keys` | az admin jelszó SHA-256 lenyomata, egyetlen sor; olvashatatlan |
+| `admin_attempts` | hibás admin próbálkozások a brute force szűréséhez |
 
 Nézetek és függvények: `daily_totals` (napi összóra), `weekly_deltas()` (heti változás),
 `save_fan()`, `delete_fan()`, `my_fan()`, `create_crew()`.
@@ -59,6 +63,19 @@ Nézetek és függvények: `daily_totals` (napi összóra), `weekly_deltas()` (h
 Védelem: RLS minden táblán, olvasás mindenkinek, írás kizárólag az RPC-ken át,
 IP-nként legfeljebb 5 új bejelölés naponta, szerveroldali hossz- és
 értékellenőrzés minden mezőre.
+
+## Moderáció
+
+A látogatók a térkép helyi listájából jelenthetnek egy bejegyzést (ok + opcionális
+megjegyzés, névtelenül, hálózatonként egyszer bejegyzésenként, naponta 20 jelentésig).
+
+Az `admin.html` jelszóval véd. **Az első megnyitáskor te állítod be a jelszót**, utána
+a beállítás véglegesen lezárul. A szerver csak a jelszó SHA-256 lenyomatát tárolja, és
+minden admin hívásnál külön ellenőrzi — a felület elrejtése önmagában semmit nem véd.
+Hálózatonként óránként 10 hibás próbálkozás után zár.
+
+Elfelejtett jelszó esetén a Supabase SQL-szerkesztőjéből törölhető az `admin_keys`
+tábla egyetlen sora, utána újra beállítható.
 
 ## Beállítás
 

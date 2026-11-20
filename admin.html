@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Moderáció — GTA VI Magyar Térkép</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .gate{max-width:440px;margin:8vh auto 0}
+  .adm li{grid-template-columns:1fr auto;gap:12px;align-items:start;cursor:default}
+  .adm li:hover{background:none}
+  .adm .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .adm .why{font-family:var(--mono);font-size:10.5px;color:#ff9c2b;text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
+  .adm .said{font-size:12.5px;color:var(--fg);margin-top:4px}
+  .count{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:6px}
+  .danger{border-color:rgba(255,107,138,.5);color:#ff6b8a}
+  .danger:hover{background:rgba(255,107,138,.14);border-color:#ff6b8a}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="gate" class="gate" hidden>
+    <p class="eyebrow"><b>GTA VI</b> · moderáció</p>
+    <h2 class="page" id="gateTitle">Belépés</h2>
+    <div class="panel pad" style="margin-top:18px">
+      <p class="note" id="gateLede"></p>
+      <div style="margin-top:14px">
+        <label for="pw">Admin jelszó</label>
+        <input type="password" id="pw" autocomplete="current-password" placeholder="legalább 12 karakter">
+      </div>
+      <p class="err" id="gateErr" style="margin:10px 0 0"></p>
+      <button class="btn primary" id="gateBtn" type="button" style="margin-top:14px">Belépés</button>
+      <p class="hint" id="gateHint"></p>
+    </div>
+  </div>
+
+  <div id="panelWrap" hidden>
+    <p class="eyebrow"><b>GTA VI</b> · moderáció
+      <span class="chip" id="sum">—</span>
+      <a href="index.html" style="margin-left:auto;font-family:var(--body);text-transform:none;letter-spacing:0">Vissza a térképre</a>
+    </p>
+    <h2 class="page">Moderáció</h2>
+
+    <div class="banner" id="banner" hidden></div>
+
+    <div class="grid" style="margin-top:18px">
+      <section class="panel">
+        <header>
+          <h2>Jelentések<span class="count" id="repCount"></span></h2>
+          <button class="btn sm" id="refresh" type="button">Frissítés</button>
+        </header>
+        <ul class="lb adm" id="repList"></ul>
+        <div class="empty" id="repEmpty" hidden><b>Nincs jelentés</b>Semmi dolgod. Amint valaki jelent egy bejegyzést, itt jelenik meg.</div>
+      </section>
+
+      <div class="side">
+        <section class="panel">
+          <header>
+            <h2>Rajongók<span class="count" id="fanCount"></span></h2>
+          </header>
+          <div class="pad" style="padding-bottom:0">
+            <input type="text" id="search" placeholder="Keresés becenévre…" autocomplete="off">
+          </div>
+          <ul class="lb adm" id="fanList"></ul>
+        </section>
+
+        <section class="panel">
+          <header><h2>Crew-k<span class="count" id="crewCount"></span></h2></header>
+          <ul class="lb adm" id="crewList"></ul>
+        </section>
+
+        <section class="panel pad">
+          <button class="btn sm" id="logout" type="button">Kijelentkezés</button>
+          <p class="hint">A jelszó csak ebben a böngészőben tárolódik. A szerver minden törlést külön ellenőriz.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>window.GTA_CONFIG={supabaseUrl:"https://fbitbdldtcvfozokmtnp.supabase.co",supabaseKey:"sb_publishable_Q3-_BMHDQ6AOgl0qQ8r1Ng_SkcPHSi9"};</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/core.js"></script>
+<script src="assets/admin.js"></script>
+</body>
+</html>

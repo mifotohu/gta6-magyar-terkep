@@ -181,6 +181,35 @@
   </form>
 </dialog>
 
+<dialog id="repDlg">
+  <form id="repForm" method="dialog">
+    <div class="mbody">
+      <h3>Jelentés</h3>
+      <p class="note" id="repWho"></p>
+      <div>
+        <label for="repReason">Mi a baj vele?</label>
+        <select id="repReason">
+          <option value="becenev">Sértő vagy obszcén becenév</option>
+          <option value="uzenet">Sértő vagy obszcén üzenet</option>
+          <option value="hamis">Nyilvánvalóan hamis adat</option>
+          <option value="spam">Spam vagy reklám</option>
+          <option value="egyeb">Egyéb</option>
+        </select>
+      </div>
+      <div>
+        <label for="repNote">Megjegyzés (opcionális)</label>
+        <textarea id="repNote" maxlength="200" placeholder="Pár szó, hogy könnyebb legyen megítélni."></textarea>
+      </div>
+      <p class="hint">A jelentés névtelen. Egy bejegyzést egy hálózatról egyszer lehet jelenteni.</p>
+      <p class="err" id="repErr"></p>
+    </div>
+    <div class="mfoot">
+      <button class="btn ghost" type="button" id="repCancel">Mégsem</button>
+      <button class="btn primary" type="submit" style="width:auto">Jelentés elküldése</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="cardDlg">
   <div class="mbody">
     <h3>Az ID-kártyád</h3>

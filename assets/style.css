@@ -122,6 +122,10 @@ svg.map.drag{cursor:grabbing}
 .lb .nm em{display:block;font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 .lb .vl{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
 .lb .vl em{display:block;font-style:normal;font-size:10px;color:#8af0c0}
+.flag{display:block;margin-top:3px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:0;color:var(--muted);cursor:pointer;padding:2px 0;text-decoration:underline;text-underline-offset:2px}
+.flag:hover{color:#ff6b8a}
+.flag.done{font-style:normal;color:rgba(169,143,208,.6);text-decoration:none;cursor:default}
 .empty{padding:22px 16px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6}
 .empty b{display:block;font-family:var(--display);font-size:15px;color:var(--fg);margin-bottom:6px;text-transform:uppercase}
 .banner{margin:0 0 18px;border:1px solid rgba(255,156,43,.4);background:rgba(255,156,43,.09);border-radius:12px;padding:11px 14px;font-size:13px;line-height:1.5;color:#ffd9a0}
