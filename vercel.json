@@ -3,6 +3,9 @@
   "crons": [
     { "path": "/api/steam/cron", "schedule": "0 4 * * *" }
   ],
+  "rewrites": [
+    { "source": "/favicon.ico", "destination": "/favicon.svg" }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",
