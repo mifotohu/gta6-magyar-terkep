@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GTA VI Magyar Térkép — beágyazható</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  body{background:linear-gradient(170deg,#120730,#07020f);background-attachment:scroll}
+  .wrap{padding-block:12px 12px;max-width:none}
+  .ehead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .etitle{font-family:var(--display);font-size:clamp(16px,4vw,22px);text-transform:uppercase;
+    background:linear-gradient(104deg,#ff2d95,#ff9c2b 75%,#ffd66e);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .enums{display:flex;gap:14px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex-wrap:wrap}
+  .enums b{color:var(--pink);font-family:var(--display);font-weight:400;font-size:15px;letter-spacing:0}
+  .cta{font-family:var(--body);font-weight:700;font-size:12px;text-decoration:none;color:#190414;padding:8px 12px;border-radius:9px;
+    background:linear-gradient(100deg,var(--pink),var(--orange));white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="ehead">
+    <div>
+      <div class="etitle">GTA VI · Honnan tolod?</div>
+      <div class="enums">
+        <span><b id="eFans">0</b> rajongó</span>
+        <span><b id="eHours">0</b> óra</span>
+        <span id="eTopWrap" hidden>élen: <b id="eTop">—</b></span>
+      </div>
+    </div>
+    <a class="cta" id="eCta" href="index.html" target="_blank" rel="noopener">Jelöld be magad</a>
+  </div>
+  <div class="maphost">
+    <svg class="map" id="map" viewBox="8 18 1000 618" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Magyar GTA VI rajongói térkép"></svg>
+    <div class="tip" id="tip" aria-hidden="true"></div>
+  </div>
+</div>
+
+<script>window.GTA_CONFIG={supabaseUrl:"https://fbitbdldtcvfozokmtnp.supabase.co",supabaseKey:"sb_publishable_Q3-_BMHDQ6AOgl0qQ8r1Ng_SkcPHSi9"};</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/counties.js"></script>
+<script src="assets/districts.js"></script>
+<script src="assets/core.js"></script>
+<script src="assets/map.js"></script>
+<script src="assets/embed.js"></script>
+</body>
+</html>

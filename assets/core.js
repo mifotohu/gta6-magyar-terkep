@@ -1,0 +1,167 @@
+/* Supabase kapcsolat, eszköz-token és API-hívások.
+   Bejelentkezés nincs: minden látogató kap egy titkos UUID-t a böngészőjében,
+   és minden írás egy szerveroldali függvényen megy át, ami ezt a tokent ellenőrzi. */
+(function (w) {
+  "use strict";
+
+  var CFG = w.GTA_CONFIG || {};
+  var URL_ = CFG.supabaseUrl;
+  var KEY = CFG.supabaseKey;
+
+  var sb = (w.supabase && URL_ && KEY)
+    ? w.supabase.createClient(URL_, KEY, { auth: { persistSession: false } })
+    : null;
+
+  /* ---------- token ---------- */
+  var TKEY = "gta6hu_token";
+  function uuid() {
+    if (w.crypto && w.crypto.randomUUID) return w.crypto.randomUUID();
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0;
+      return (c === "x" ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+  function token() {
+    var t = null;
+    try { t = localStorage.getItem(TKEY); } catch (e) { }
+    if (!t) {
+      t = uuid();
+      try { localStorage.setItem(TKEY, t); } catch (e) { }
+    }
+    return t;
+  }
+  function savedFanId() { try { return localStorage.getItem("gta6hu_fan"); } catch (e) { return null; } }
+  function rememberFan(id) { try { id ? localStorage.setItem("gta6hu_fan", id) : localStorage.removeItem("gta6hu_fan"); } catch (e) { } }
+
+  /* ---------- hibaüzenetek ---------- */
+  var MSG = {
+    ROSSZ_BECENEV: "A becenév 2 és 22 karakter között legyen.",
+    ROSSZ_HELY: "Válassz helyet a listából.",
+    ROSSZ_ORASZAM: "Az óraszám 0 és 5000 között legyen.",
+    TUL_SOK_PROBALKOZAS: "Erről a hálózatról ma már öt bejelölés érkezett. Holnap újra megy.",
+    ELOBB_JELOLD_BE_MAGAD: "Előbb jelöld be magad a térképen, utána alapíthatsz crew-t.",
+    FOGLALT_CREW_NEV: "Ez a crew-név már foglalt.",
+    ROSSZ_CREW_NEV: "A crew neve 2 és 24 karakter között legyen.",
+    HIANYZO_TOKEN: "A böngésződ nem engedi a helyi tárolást, így a bejelölés nem menthető."
+  };
+  function humanError(err) {
+    if (!err) return "Ismeretlen hiba.";
+    var m = String(err.message || err);
+    for (var k in MSG) { if (m.indexOf(k) >= 0) return MSG[k]; }
+    if (m.indexOf("Failed to fetch") >= 0 || m.indexOf("NetworkError") >= 0) {
+      return "Nincs kapcsolat a szerverrel. Nézd meg a netkapcsolatot, és próbáld újra.";
+    }
+    return "A mentés nem sikerült. Próbáld újra kicsit később.";
+  }
+
+  /* ---------- API ---------- */
+  function need() { if (!sb) throw new Error("Nincs adatbázis-kapcsolat."); }
+
+  var api = {
+    ready: !!sb,
+
+    fans: function () {
+      need();
+      return sb.from("fans")
+        .select("id,nick,place_id,hours,platform,note,crew_id,created_at,updated_at")
+        .order("hours", { ascending: false })
+        .limit(5000)
+        .then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+
+    crews: function () {
+      need();
+      return sb.from("crews").select("id,name,color,created_at").limit(500)
+        .then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+
+    weekly: function () {
+      need();
+      return sb.rpc("weekly_deltas")
+        .then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+
+    daily: function () {
+      need();
+      return sb.from("daily_totals").select("day,total_hours").order("day")
+        .then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+
+    hourLog: function () {
+      need();
+      return sb.from("hour_log").select("fan_id,hours,logged_at").order("logged_at").limit(10000)
+        .then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+
+    mine: function () {
+      need();
+      return sb.rpc("my_fan", { p_token: token() })
+        .then(function (r) {
+          if (r.error) throw r.error;
+          var row = (r.data || [])[0] || null;
+          rememberFan(row ? row.id : null);
+          return row;
+        });
+    },
+
+    save: function (rec) {
+      need();
+      return sb.rpc("save_fan", {
+        p_token: token(),
+        p_nick: rec.nick,
+        p_place_id: rec.place_id,
+        p_hours: rec.hours,
+        p_platform: rec.platform,
+        p_note: rec.note || null,
+        p_crew_id: rec.crew_id || null
+      }).then(function (r) {
+        if (r.error) throw r.error;
+        rememberFan(r.data);
+        return r.data;
+      });
+    },
+
+    remove: function () {
+      need();
+      return sb.rpc("delete_fan", { p_token: token() })
+        .then(function (r) { if (r.error) throw r.error; rememberFan(null); return r.data; });
+    },
+
+    createCrew: function (name, color) {
+      need();
+      return sb.rpc("create_crew", { p_token: token(), p_name: name, p_color: color })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+
+    /* élő csatorna: jelenlét + változás-értesítés */
+    channel: function (onChange, onPeers) {
+      if (!sb) return null;
+      var ch = sb.channel("gta6hu-lobby", { config: { presence: { key: token() } } });
+      ch.on("postgres_changes", { event: "*", schema: "public", table: "fans" }, function () {
+        if (onChange) onChange();
+      });
+      if (onPeers) {
+        ch.on("presence", { event: "sync" }, function () {
+          var st = ch.presenceState(), out = [];
+          Object.keys(st).forEach(function (k) {
+            (st[k] || []).forEach(function (m) { out.push(m); });
+          });
+          onPeers(out);
+        });
+      }
+      return ch;
+    }
+  };
+
+  /* ---------- formázók ---------- */
+  var ENT = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return ENT[c]; }); }
+  function nf(n) { return (Math.round(n) || 0).toLocaleString("hu-HU"); }
+  function platLabel(p) { return p === "Egyeb" ? "Egyéb" : p; }
+  function days(from) { return Math.floor((Date.now() - from.getTime()) / 86400000) + 1; }
+
+  w.GTACore = {
+    sb: sb, api: api, token: token, savedFanId: savedFanId,
+    esc: esc, nf: nf, platLabel: platLabel, days: days, humanError: humanError
+  };
+})(window);

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Statisztikák — GTA VI Magyar Térkép</title>
+<meta name="description" content="A magyar GTA VI rajongói térkép számai: napi összóra, megye-verseny 10 000 lakosra, platform- és rangmegoszlás.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow"><b>GTA VI</b> · Magyar rajongói térkép <span class="chip" id="dayChip">—</span></p>
+  <h2 class="page">Statisztikák</h2>
+  <p class="lede">Minden szám a bejelölt rajongók önkéntes adataiból jön, és percenként frissül.</p>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <div class="stats" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+    <div class="stat a"><div class="k">Rajongó</div><div class="v" id="sFans">0</div></div>
+    <div class="stat b"><div class="k">Összes óra</div><div class="v" id="sHours">0</div></div>
+    <div class="stat e"><div class="k">Ezen a héten</div><div class="v" id="sWeek">+0</div></div>
+    <div class="stat c"><div class="k">Átlag / fő</div><div class="v" id="sAvg">0 <small>óra</small></div></div>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <header><h2>Összes játszott óra naponta</h2></header>
+      <div class="pad"><div id="dailyChart"></div></div>
+      <div class="mapfoot"><span id="dailyNote">a megjelenés óta</span></div>
+    </section>
+
+    <section class="panel">
+      <header><h2>Hőtérkép · 10 000 lakosra</h2></header>
+      <div class="maphost">
+        <svg class="map" id="map" viewBox="8 18 1000 618" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Rajongósűrűség megyénként"></svg>
+      </div>
+      <div class="mapfoot"><span>kevés<span class="bar"></span>sok rajongó 10 000 lakosra</span></div>
+    </section>
+  </div>
+
+  <div class="grid" style="margin-top:18px">
+    <section class="panel">
+      <header><h2>Megye-verseny</h2></header>
+      <ul class="lb" id="countyList"></ul>
+    </section>
+
+    <div class="side">
+      <section class="panel">
+        <header><h2>Platformok</h2></header>
+        <div class="pad"><div id="platChart"></div></div>
+      </section>
+      <section class="panel">
+        <header><h2>Rangok</h2></header>
+        <div class="pad"><div id="rankChart"></div></div>
+      </section>
+      <section class="panel">
+        <header><h2>A hét hajtósai</h2></header>
+        <ul class="lb" id="weekList"></ul>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    <nav><a href="index.html">Vissza a térképre</a><a href="embed.html">Beágyazható térkép</a></nav>
+    <b>Nem hivatalos rajongói oldal.</b> Nem áll kapcsolatban a Rockstar Games-szel vagy a Take-Two Interactive-val. A lakosságszámok kerekített becslések, a határok: © OpenStreetMap közreműködők, ODbL.
+  </footer>
+</div>
+
+<script>window.GTA_CONFIG={supabaseUrl:"https://fbitbdldtcvfozokmtnp.supabase.co",supabaseKey:"sb_publishable_Q3-_BMHDQ6AOgl0qQ8r1Ng_SkcPHSi9"};</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/counties.js"></script>
+<script src="assets/districts.js"></script>
+<script src="assets/core.js"></script>
+<script src="assets/map.js"></script>
+<script src="assets/stats.js"></script>
+</body>
+</html>
