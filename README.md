@@ -77,6 +77,39 @@ Hálózatonként óránként 10 hibás próbálkozás után zár.
 Elfelejtett jelszó esetén a Supabase SQL-szerkesztőjéből törölhető az `admin_keys`
 tábla egyetlen sora, utána újra beállítható.
 
+## Steam-hitelesítés
+
+PC-s játékos összekötheti a Steam-fiókját; onnantól a valódi játékideje látszik
+`✓ Steam` jelvénnyel, és kézzel nem írható át. A folyamat **Steam OpenID** —
+a játékos a Steamen lép be, így bizonyítja, hogy övé a fiók; profil-URL beírásával
+nem lehet más óraszámát ellopni.
+
+Szerverfüggvények (Vercel, `api/`):
+
+| Végpont | Mit csinál |
+|---|---|
+| `POST /api/steam/start` | egyszer használatos azonosítót köt a látogató tokenjéhez, visszaadja a Steam belépő URL-t |
+| `GET /api/steam/return` | a Steam ide tér vissza; ellenőrzi az állítást a Steamnél, lekéri a játékidőt, elmenti |
+| `POST /api/steam/refresh` | a játékos kézi frissítése |
+| `GET /api/steam/cron` | napi 04:00-kor minden összekötött fiókot frissít (`CRON_SECRET`) |
+
+A SteamID a privát `fan_steam` táblában marad, az API-n át nem olvasható; kifelé
+csak az óraszám és a hitelesítés ténye látszik. Egy Steam-fiók egy bejegyzéshez köthető.
+
+Környezeti változók a Vercel projektben:
+
+| Név | Mire kell |
+|---|---|
+| `STEAM_API_KEY` | **neked kell beállítani**, a steamcommunity.com/dev/apikey oldalról |
+| `LINK_SECRET` | belső titok a szerverfüggvények és az adatbázis között |
+| `CRON_SECRET` | a napi frissítés hitelesítése |
+| `SUPABASE_URL`, `SUPABASE_KEY` | ugyanaz, mint a böngészőben |
+| `GTA6_GAME_NAME` | a játék neve a Steam-könyvtárban (alapértelmezés: Grand Theft Auto VI) |
+| `GTA6_APPID` | opcionális; ha meg van adva, név helyett ez alapján keresünk |
+
+`STEAM_API_KEY` nélkül a gomb udvariasan jelzi, hogy a hitelesítés nincs bekapcsolva;
+minden más működik.
+
 ## Beállítás
 
 A Supabase URL és a publikus kulcs mindhárom HTML-ben, a `window.GTA_CONFIG`

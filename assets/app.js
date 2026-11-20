@@ -115,6 +115,11 @@
     var r = D.rankOf(h);
     return '<span class="rank" style="color:' + r.color + '">' + esc(r.name) + "</span>";
   }
+  /* hitelesített óraszám jelvénye */
+  function steamTag(f) {
+    if (!f || !f.steam_verified_at) return "";
+    return '<span class="rank" style="color:#5ad2a0" title="A játékidőt a Steam erősítette meg">✓ Steam</span>';
+  }
 
   function renderBoard(pg) {
     var list = $("lbList"), empty = $("lbEmpty"), note = $("lbNote");
@@ -137,7 +142,7 @@
           return '<li data-place="' + esc(f.place_id) + '"><span class="rk">' + (i + 1) + "</span>" +
             '<span class="nm">' + (online[f.id] ? '<span class="crewdot" style="background:#5ad2a0"></span>' : "") +
             (cw ? '<span class="crewdot" style="background:' + esc(cw.color) + '"></span>' : "") +
-            esc(f.nick) + " " + rankTag(f.hours) +
+            esc(f.nick) + " " + rankTag(f.hours) + steamTag(f) +
             "<em>" + (pl ? esc(pl.short) : "") + " · " + esc(C.platLabel(f.platform)) + "</em></span>" +
             '<span class="vl">' + nf(f.hours) + " ó" + (weekly[f.id] ? "<em>+" + nf(weekly[f.id]) + "</em>" : "") + "</span></li>";
         }).join("");
@@ -197,7 +202,7 @@
       var mine = me && me.id === f.id;
       return "<li><span class=\"rk\">" + (i + 1) + "</span>" +
         '<span class="nm">' + (online[f.id] ? '<span class="crewdot" style="background:#5ad2a0"></span>' : "") +
-        esc(f.nick) + " " + rankTag(f.hours) + "<em>" + esc(C.platLabel(f.platform)) +
+        esc(f.nick) + " " + rankTag(f.hours) + steamTag(f) + "<em>" + esc(C.platLabel(f.platform)) +
         (cw ? " · " + esc(cw.name) : "") + (f.note ? " · " + esc(f.note) : "") + "</em></span>" +
         '<span class="vl">' + nf(f.hours) + " ó" +
         (mine ? "" : (reported[f.id]
@@ -244,7 +249,8 @@
     }
     var pl = D.BY_ID[me.place_id], r = D.rankOf(me.hours);
     var cw = me.crew_id && crews[me.crew_id];
-    box.innerHTML = '<div class="mine"><div class="nm">' + esc(me.nick) + " " + rankTag(me.hours) + "</div>" +
+    var ver = !!me.steam_verified_at;
+    box.innerHTML = '<div class="mine"><div class="nm">' + esc(me.nick) + " " + rankTag(me.hours) + steamTag(me) + "</div>" +
       '<div class="meta">' + (pl ? esc(pl.label) : "") + " · " + nf(me.hours) + " óra · " + esc(C.platLabel(me.platform)) +
       (weekly[me.id] ? " · +" + nf(weekly[me.id]) + " a héten" : "") + "</div>" +
       (cw ? '<div class="meta"><span class="crewdot" style="background:' + esc(cw.color) + '"></span>' + esc(cw.name) + "</div>" : "") +
@@ -252,12 +258,79 @@
       '<div class="row"><button class="btn sm" id="bEdit" type="button">Módosítás</button>' +
       '<button class="btn sm" id="bCard" type="button">ID-kártya</button>' +
       (cw ? "" : '<button class="btn sm" id="bCrew" type="button">Crew alapítása</button>') +
-      '<button class="btn sm ghost" id="bDel" type="button">Törlés</button></div></div>';
+      (ver
+        ? '<button class="btn sm" id="bSteamRef" type="button">Frissítés a Steamről</button>' +
+          '<button class="btn sm ghost" id="bSteamOff" type="button">Steam leválasztása</button>'
+        : '<button class="btn sm" id="bSteam" type="button">Steam-hitelesítés</button>') +
+      '<button class="btn sm ghost" id="bDel" type="button">Törlés</button></div>' +
+      (ver
+        ? '<p class="hint">A játékidődet a Steam adja, naponta frissül. Kézzel nem írható át.</p>'
+        : '<p class="hint">PC-n összekötheted a Steam-fiókod, és onnantól a valódi játékidőd látszik, ✓ jelvénnyel.</p>') +
+      "</div>";
     $("openForm").textContent = "Óraszám frissítése";
     $("bEdit").onclick = openForm;
     $("bCard").onclick = showCard;
     $("bDel").onclick = removeMine;
     if ($("bCrew")) $("bCrew").onclick = function () { $("cErr").textContent = ""; $("crewDlg").showModal(); };
+    if ($("bSteam")) $("bSteam").onclick = steamLink;
+    if ($("bSteamRef")) $("bSteamRef").onclick = steamRefresh;
+    if ($("bSteamOff")) $("bSteamOff").onclick = steamUnlink;
+  }
+
+  /* ---------------- Steam ---------------- */
+  var STEAM_MSG = {
+    ok: "Kész: a Steam megerősítette a játékidődet.",
+    megszakitva: "A Steam-bejelentkezést megszakítottad.",
+    nem_hiteles: "A Steam nem erősítette meg a bejelentkezést. Próbáld újra.",
+    privat: "A Steam-profilodon a játékidő nem publikus. Steam → Beállítások → Adatvédelem → „Játékadatok: Nyilvános”, utána próbáld újra.",
+    nincs_jatek: "Nem találjuk a GTA VI-ot a Steam-könyvtáradban.",
+    mar_foglalt: "Ezt a Steam-fiókot már hitelesítette valaki.",
+    lejart: "A hitelesítés lejárt. Indítsd el újra.",
+    steam_hiba: "A Steam most nem válaszol. Próbáld később.",
+    steam_api: "A Steam most nem válaszol. Próbáld később.",
+    nincs_beallitva: "A Steam-hitelesítés még nincs bekapcsolva ezen az oldalon.",
+    db: "Nem sikerült elmenteni. Próbáld újra."
+  };
+
+  function steamLink() {
+    var b = $("bSteam");
+    b.disabled = true;
+    b.textContent = "Átirányítás…";
+    api.steamStart().then(function (d) {
+      if (d && d.url) location.href = d.url;
+      else { banner("Nem sikerült elindítani a hitelesítést."); b.disabled = false; b.textContent = "Steam-hitelesítés"; }
+    }).catch(function (err) {
+      banner(STEAM_MSG[err.code] || err.message || "Nem sikerült elindítani a hitelesítést.");
+      b.disabled = false;
+      b.textContent = "Steam-hitelesítés";
+    });
+  }
+
+  function steamRefresh() {
+    var b = $("bSteamRef");
+    b.disabled = true;
+    b.textContent = "Frissítés…";
+    api.steamRefresh().then(function () {
+      banner(null);
+      return reload();
+    }).catch(function (err) {
+      banner(STEAM_MSG[err.code] || err.message || "A frissítés nem sikerült.");
+    }).then(function () {
+      if ($("bSteamRef")) { $("bSteamRef").disabled = false; $("bSteamRef").textContent = "Frissítés a Steamről"; }
+    });
+  }
+
+  function steamUnlink() {
+    var b = $("bSteamOff");
+    if (b.getAttribute("data-armed") !== "1") {
+      b.setAttribute("data-armed", "1");
+      b.textContent = "Biztos? Kattints újra";
+      setTimeout(function () {
+        if (b.isConnected) { b.setAttribute("data-armed", "0"); b.textContent = "Steam leválasztása"; }
+      }, 4000);
+      return;
+    }
+    api.steamUnlink().then(reload).catch(function (err) { banner(C.humanError(err)); });
   }
 
   /* ---------------- űrlap ---------------- */
@@ -295,6 +368,10 @@
       var pl = D.BY_ID[me.place_id];
       $("fPlace").value = pl ? pl.label : "";
     }
+    var locked = !!(me && me.steam_verified_at);
+    $("fHours").readOnly = locked;
+    $("fHours").style.opacity = locked ? ".55" : "";
+    $("fHoursHint").hidden = !locked;
     dlg.showModal();
     setTimeout(function () { $("fNick").focus(); }, 30);
   }
@@ -495,6 +572,14 @@
   (function () {
     var d = C.days(D.RELEASE);
     $("dayChip").textContent = d > 0 ? (d + ". nap a megjelenés óta") : "Hamarosan";
+  })();
+
+  /* a Steam-hitelesítés után ide érkezünk vissza */
+  (function () {
+    var m = /[?&]steam=([a-z_]+)/.exec(location.search);
+    if (!m) return;
+    banner(STEAM_MSG[m[1]] || "Ismeretlen válasz a Steamtől.");
+    try { history.replaceState(null, "", location.pathname); } catch (e) { }
   })();
 
   if (!api.ready) {

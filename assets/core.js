@@ -62,13 +62,31 @@
   /* ---------- API ---------- */
   function need() { if (!sb) throw new Error("Nincs adatbázis-kapcsolat."); }
 
+  /* saját szerverfüggvény hívása a böngésző tokenjével */
+  function callApi(path) {
+    return fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: token() })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (d) {
+        if (!r.ok) {
+          var e = new Error(d.uzenet || d.error || ("Hiba: " + r.status));
+          e.code = d.error;
+          throw e;
+        }
+        return d;
+      });
+    });
+  }
+
   var api = {
     ready: !!sb,
 
     fans: function () {
       need();
       return sb.from("fans")
-        .select("id,nick,place_id,hours,platform,note,crew_id,created_at,updated_at")
+        .select("id,nick,place_id,hours,platform,note,crew_id,created_at,updated_at,steam_hours,steam_verified_at")
         .order("hours", { ascending: false })
         .limit(5000)
         .then(function (r) { if (r.error) throw r.error; return r.data || []; });
@@ -135,6 +153,15 @@
     createCrew: function (name, color) {
       need();
       return sb.rpc("create_crew", { p_token: token(), p_name: name, p_color: color })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+
+    /* --- Steam-hitelesítés (szerveroldali végpontok) --- */
+    steamStart: function () { return callApi("/api/steam/start"); },
+    steamRefresh: function () { return callApi("/api/steam/refresh"); },
+    steamUnlink: function () {
+      need();
+      return sb.rpc("steam_unlink", { p_token: token() })
         .then(function (r) { if (r.error) throw r.error; return r.data; });
     },
 
