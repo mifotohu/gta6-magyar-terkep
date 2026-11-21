@@ -157,6 +157,12 @@
     },
 
     /* --- Steam-hitelesítés (szerveroldali végpontok) --- */
+    steamEnabled: function () {
+      return fetch("/api/steam/status")
+        .then(function (r) { return r.json(); })
+        .then(function (d) { return !!(d && d.enabled); })
+        .catch(function () { return false; });
+    },
     steamStart: function () { return callApi("/api/steam/start"); },
     steamRefresh: function () { return callApi("/api/steam/refresh"); },
     steamUnlink: function () {

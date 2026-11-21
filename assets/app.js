@@ -7,6 +7,7 @@
 
   var fans = [], crews = {}, weekly = {}, online = {}, me = null;
   var tab = "place", sel = null, map = null, channel = null;
+  var steamOn = false; /* csak akkor kínáljuk a Steam-hitelesítést, ha a szerveren be van kapcsolva */
 
   /* kinek küldtünk már jelentést ebből a böngészőből */
   var reported = (function () {
@@ -261,11 +262,11 @@
       (ver
         ? '<button class="btn sm" id="bSteamRef" type="button">Frissítés a Steamről</button>' +
           '<button class="btn sm ghost" id="bSteamOff" type="button">Steam leválasztása</button>'
-        : '<button class="btn sm" id="bSteam" type="button">Steam-hitelesítés</button>') +
+        : (steamOn ? '<button class="btn sm" id="bSteam" type="button">Steam-hitelesítés</button>' : "")) +
       '<button class="btn sm ghost" id="bDel" type="button">Törlés</button></div>' +
       (ver
         ? '<p class="hint">A játékidődet a Steam adja, naponta frissül. Kézzel nem írható át.</p>'
-        : '<p class="hint">PC-n összekötheted a Steam-fiókod, és onnantól a valódi játékidőd látszik, ✓ jelvénnyel.</p>') +
+        : (steamOn ? '<p class="hint">PC-n összekötheted a Steam-fiókod, és onnantól a valódi játékidőd látszik, ✓ jelvénnyel.</p>' : "")) +
       "</div>";
     $("openForm").textContent = "Óraszám frissítése";
     $("bEdit").onclick = openForm;
@@ -581,6 +582,12 @@
     banner(STEAM_MSG[m[1]] || "Ismeretlen válasz a Steamtől.");
     try { history.replaceState(null, "", location.pathname); } catch (e) { }
   })();
+
+  api.steamEnabled().then(function (on) {
+    if (!on) return;
+    steamOn = true;
+    renderMine();
+  });
 
   if (!api.ready) {
     banner("Az adatbázis nem érhető el ebből a nézetből, ezért a térkép üresen marad.");
