@@ -78,7 +78,7 @@
     return String(s || "").split(", ").map(function (r) { return REASONS[r] || r; }).join(" · ");
   }
 
-  var allFans = [], allCrews = [], allReports = [];
+  var allFans = [], allCrews = [], allReports = [], allProofs = [];
 
   function banner(msg) {
     $("banner").hidden = !msg;
@@ -87,9 +87,9 @@
 
   function load() {
     if (!key) { showGate(""); return; }
-    Promise.all([api.adminReports(key), api.adminFans(key), api.adminCrews(key)])
+    Promise.all([api.adminReports(key), api.adminFans(key), api.adminCrews(key), api.adminProofs(key)])
       .then(function (r) {
-        allReports = r[0]; allFans = r[1]; allCrews = r[2];
+        allReports = r[0]; allFans = r[1]; allCrews = r[2]; allProofs = r[3];
         banner(null);
         render();
       })
@@ -101,9 +101,31 @@
   }
 
   function render() {
-    $("sum").textContent = allReports.length
-      ? allReports.length + " jelentett bejegyzés"
-      : "nincs nyitott jelentés";
+    var tenni = allReports.length + allProofs.length;
+    $("sum").textContent = tenni
+      ? (allProofs.length ? allProofs.length + " kép vár, " : "") +
+        allReports.length + " jelentett bejegyzés"
+      : "nincs nyitott teendő";
+
+    /* hitelesítésre váró képek */
+    $("proofCount").textContent = allProofs.length ? "(" + allProofs.length + ")" : "";
+    $("proofEmpty").hidden = allProofs.length > 0;
+    $("proofList").innerHTML = allProofs.map(function (p) {
+      var kep = (typeof p.image === "string" && p.image.indexOf("data:image/") === 0)
+        ? '<img class="shot" src="' + p.image + '" alt="Beküldött képernyőkép">'
+        : '<div class="why">A kép nem olvasható.</div>';
+      return "<li>" +
+        '<span class="nm" style="white-space:normal">' + esc(p.nick) +
+        "<em>" + esc(placeName(p.place_id)) + " · " + esc(C.platLabel(p.platform)) + " · " + esc(when(p.created_at)) + "</em>" +
+        '<div class="why">' + nf(p.mostani) + " óra → <b>" + nf(p.kert) + " óra</b></div>" +
+        (p.note ? '<div class="said">„' + esc(p.note) + "”</div>" : "") +
+        kep +
+        "</span>" +
+        '<span class="acts">' +
+        '<button class="btn sm ok" data-proofok="' + esc(p.id) + '" type="button">Elfogadom</button>' +
+        '<button class="btn sm danger" data-proofno="' + esc(p.id) + '" type="button">Elutasítom</button>' +
+        "</span></li>";
+    }).join("");
     $("repCount").textContent = allReports.length ? "(" + allReports.length + ")" : "";
     $("fanCount").textContent = "(" + allFans.length + ")";
     $("crewCount").textContent = "(" + allCrews.length + ")";
@@ -162,9 +184,19 @@
   }
 
   document.addEventListener("click", function (e) {
-    var b = e.target.closest("button[data-del],button[data-delcrew],button[data-clear]");
+    var b = e.target.closest("button[data-del],button[data-delcrew],button[data-clear],button[data-proofok],button[data-proofno]");
     if (!b || !key) return;
     var id;
+    if ((id = b.getAttribute("data-proofok"))) {
+      b.disabled = true;
+      api.adminProofDecide(key, id, true).then(load).catch(function (err) { b.disabled = false; banner(C.humanError(err)); });
+      return;
+    }
+    if ((id = b.getAttribute("data-proofno"))) {
+      b.disabled = true;
+      api.adminProofDecide(key, id, false).then(load).catch(function (err) { b.disabled = false; banner(C.humanError(err)); });
+      return;
+    }
     if ((id = b.getAttribute("data-clear"))) {
       api.adminClearReports(key, id).then(load).catch(function (err) { banner(C.humanError(err)); });
       return;

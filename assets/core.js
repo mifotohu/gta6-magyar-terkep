@@ -44,6 +44,9 @@
     ROSSZ_CREW_NEV: "A crew neve 2 és 24 karakter között legyen.",
     HIANYZO_TOKEN: "A böngésződ nem engedi a helyi tárolást, így a bejelölés nem menthető.",
     TUL_SOK_JELENTES: "Erről a hálózatról ma már sok jelentés érkezett. Holnap újra megy.",
+    MAR_VAN_FOLYAMATBAN: "Már vár elbírálásra egy képed. Előbb azt nézzük át.",
+    ROSSZ_KEP: "Ez nem kép. Válassz egy képernyőképet (PNG vagy JPG).",
+    TUL_NAGY_KEP: "A kép még kicsinyítve is túl nagy. Próbálj egy egyszerűbb képernyőképet.",
     NINCS_ILYEN: "Ez a bejegyzés már nincs meg.",
     NINCS_JOGOSULTSAG: "Hibás jelszó.",
     MAR_VAN_ADMIN: "Az admin jelszó már be van állítva.",
@@ -86,7 +89,7 @@
     fans: function () {
       need();
       return sb.from("fans")
-        .select("id,nick,place_id,hours,platform,note,crew_id,created_at,updated_at,steam_hours,steam_verified_at")
+        .select("id,nick,place_id,hours,platform,note,crew_id,created_at,updated_at,steam_hours,steam_verified_at,proof_verified_at")
         .order("hours", { ascending: false })
         .limit(5000)
         .then(function (r) { if (r.error) throw r.error; return r.data || []; });
@@ -174,6 +177,28 @@
     report: function (fanId, reason, note) {
       need();
       return sb.rpc("report_fan", { p_fan_id: fanId, p_reason: reason, p_note: note || null })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+
+    /* --- hitelesítés képpel --- */
+    proofSubmit: function (hours, platform, image, note) {
+      need();
+      return sb.rpc("proof_submit", {
+        p_token: token(), p_hours: hours, p_platform: platform, p_image: image, p_note: note || null
+      }).then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+    proofMine: function () {
+      need();
+      return sb.rpc("proof_mine", { p_token: token() })
+        .then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+    adminProofs: function (key) {
+      need();
+      return sb.rpc("admin_proofs", { p_key: key }).then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+    adminProofDecide: function (key, id, ok) {
+      need();
+      return sb.rpc("admin_proof_decide", { p_key: key, p_proof_id: id, p_ok: ok })
         .then(function (r) { if (r.error) throw r.error; return r.data; });
     },
 

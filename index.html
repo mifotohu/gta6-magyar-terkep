@@ -183,6 +183,36 @@
   </form>
 </dialog>
 
+<dialog id="proofDlg">
+  <form id="proofForm" method="dialog">
+    <div class="mbody">
+      <h3>Óraszám igazolása</h3>
+      <p class="note">Tölts fel egy képernyőképet, amin látszik a játékidőd — bármelyik platformról. Átnézzük, és ha rendben van, ✓ jelvényt kap az óraszámod.</p>
+      <div>
+        <label for="pFile">Képernyőkép</label>
+        <input type="file" id="pFile" accept="image/png,image/jpeg,image/webp" style="padding:9px">
+        <p class="hint">A kép a böngésződben kicsinyítve megy fel, és az elbírálás után töröljük. Ügyelj rá, hogy ne legyen rajta más személyes adat.</p>
+      </div>
+      <img id="pPrev" class="idcard" alt="A feltöltött kép előnézete" hidden>
+      <div class="two">
+        <div>
+          <label for="pHours">A képen látható óraszám</label>
+          <input type="number" id="pHours" min="0" max="5000" step="1" value="0" required>
+        </div>
+        <div>
+          <label for="pNote">Megjegyzés</label>
+          <input type="text" id="pNote" maxlength="200" placeholder="pl. PS5, profil oldal">
+        </div>
+      </div>
+      <p class="err" id="pErr"></p>
+    </div>
+    <div class="mfoot">
+      <button class="btn ghost" type="button" id="pCancel">Mégsem</button>
+      <button class="btn primary" type="submit" id="pSend" style="width:auto">Beküldöm</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="repDlg">
   <form id="repForm" method="dialog">
     <div class="mbody">

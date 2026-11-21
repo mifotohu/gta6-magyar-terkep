@@ -64,6 +64,20 @@ Védelem: RLS minden táblán, olvasás mindenkinek, írás kizárólag az RPC-k
 IP-nként legfeljebb 5 új bejelölés naponta, szerveroldali hossz- és
 értékellenőrzés minden mezőre.
 
+## Hitelesítés képernyőképpel
+
+Steam-fiók nélkül, minden platformon működik. A játékos feltölt egy képernyőképet
+a játékidejéről; a böngésző **kicsinyíti és JPEG-be tömöríti** (max 1280 px, ~20–200 KB),
+majd a kép a privát `proofs` táblába kerül data URI-ként. Nincs tárhely-bucket,
+nincs publikus képlink: a képet csak az admin felület látja, és **elbírálás után
+azonnal töröljük** (a sor marad, a kép helye kiürül).
+
+Elfogadáskor a bejegyzés óraszáma a képen látott értékre áll, és `✓ igazolt`
+jelvényt kap. Ha a játékos utána kézzel átírja az óraszámát, a jelvény magától lekerül.
+
+Korlátok: egyszerre egy függőben lévő kép játékosonként, hálózatonként napi 5 beküldés,
+legfeljebb ~650 KB kép.
+
 ## Moderáció
 
 A látogatók a térkép helyi listájából jelenthetnek egy bejegyzést (ok + opcionális

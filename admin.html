@@ -17,6 +17,9 @@
   .adm .why{font-family:var(--mono);font-size:10.5px;color:#ff9c2b;text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
   .adm .said{font-size:12.5px;color:var(--fg);margin-top:4px}
   .count{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:6px}
+  .shot{display:block;max-width:100%;width:260px;border-radius:10px;border:1px solid var(--line);margin-top:8px}
+  .ok{border-color:rgba(90,210,160,.5);color:#5ad2a0}
+  .ok:hover{background:rgba(90,210,160,.14);border-color:#5ad2a0}
   .danger{border-color:rgba(255,107,138,.5);color:#ff6b8a}
   .danger:hover{background:rgba(255,107,138,.14);border-color:#ff6b8a}
 </style>
@@ -49,10 +52,18 @@
     <div class="banner" id="banner" hidden></div>
 
     <div class="grid" style="margin-top:18px">
+      <section class="panel" style="margin-bottom:18px">
+        <header>
+          <h2>Hitelesítések<span class="count" id="proofCount"></span></h2>
+          <button class="btn sm" id="refresh" type="button">Frissítés</button>
+        </header>
+        <ul class="lb adm" id="proofList"></ul>
+        <div class="empty" id="proofEmpty" hidden><b>Nincs beküldött kép</b>Ha valaki képpel igazolja az óraszámát, itt jelenik meg, és egy kattintással döntesz róla.</div>
+      </section>
+
       <section class="panel">
         <header>
           <h2>Jelentések<span class="count" id="repCount"></span></h2>
-          <button class="btn sm" id="refresh" type="button">Frissítés</button>
         </header>
         <ul class="lb adm" id="repList"></ul>
         <div class="empty" id="repEmpty" hidden><b>Nincs jelentés</b>Semmi dolgod. Amint valaki jelent egy bejegyzést, itt jelenik meg.</div>

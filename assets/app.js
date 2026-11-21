@@ -118,8 +118,14 @@
   }
   /* hitelesített óraszám jelvénye */
   function steamTag(f) {
-    if (!f || !f.steam_verified_at) return "";
-    return '<span class="rank" style="color:#5ad2a0" title="A játékidőt a Steam erősítette meg">✓ Steam</span>';
+    if (!f) return "";
+    if (f.steam_verified_at) {
+      return '<span class="rank" style="color:#5ad2a0" title="A játékidőt a Steam erősítette meg">✓ Steam</span>';
+    }
+    if (f.proof_verified_at) {
+      return '<span class="rank" style="color:#5ad2a0" title="Képernyőképpel igazolt játékidő">✓ igazolt</span>';
+    }
+    return "";
   }
 
   function renderBoard(pg) {
@@ -263,10 +269,11 @@
         ? '<button class="btn sm" id="bSteamRef" type="button">Frissítés a Steamről</button>' +
           '<button class="btn sm ghost" id="bSteamOff" type="button">Steam leválasztása</button>'
         : (steamOn ? '<button class="btn sm" id="bSteam" type="button">Steam-hitelesítés</button>' : "")) +
+      (ver ? "" : '<button class="btn sm" id="bProof" type="button">Óraszám igazolása</button>') +
       '<button class="btn sm ghost" id="bDel" type="button">Törlés</button></div>' +
       (ver
         ? '<p class="hint">A játékidődet a Steam adja, naponta frissül. Kézzel nem írható át.</p>'
-        : (steamOn ? '<p class="hint">PC-n összekötheted a Steam-fiókod, és onnantól a valódi játékidőd látszik, ✓ jelvénnyel.</p>' : "")) +
+        : proofHint()) +
       "</div>";
     $("openForm").textContent = "Óraszám frissítése";
     $("bEdit").onclick = openForm;
@@ -276,7 +283,112 @@
     if ($("bSteam")) $("bSteam").onclick = steamLink;
     if ($("bSteamRef")) $("bSteamRef").onclick = steamRefresh;
     if ($("bSteamOff")) $("bSteamOff").onclick = steamUnlink;
+    if ($("bProof")) $("bProof").onclick = openProof;
   }
+
+  /* ---------------- hitelesítés képpel ---------------- */
+  var myProof = null; /* a legutóbbi beküldésem állapota */
+
+  function proofHint() {
+    if (myProof && myProof.status === "varakozik") {
+      return '<p class="hint" style="color:#ffd9a0">A képedet beküldted, elbírálásra vár. ' +
+        nf(myProof.hours) + " óra.</p>";
+    }
+    if (me && me.proof_verified_at) {
+      return '<p class="hint">Az óraszámodat képernyőkép igazolja. Ha kézzel átírod, a jelvény lekerül.</p>';
+    }
+    if (myProof && myProof.status === "elutasitva") {
+      return '<p class="hint" style="color:#ff6b8a">A legutóbbi képedet elutasítottuk. Küldhetsz újat, amin jól látszik a játékidő.</p>';
+    }
+    return '<p class="hint">Küldj be egy képernyőképet a játékidődről, és ✓ jelvényt kap az óraszámod. Bármelyik platformról jó.</p>';
+  }
+
+  function loadProof() {
+    if (!api.ready) return Promise.resolve();
+    return api.proofMine().then(function (rows) {
+      myProof = rows && rows[0] ? rows[0] : null;
+    }).catch(function () { myProof = null; });
+  }
+
+  /* a képet a böngészőben kicsinyítjük, hogy ne töltsünk fel feleslegesen nagyot */
+  function shrink(file, maxW, quality) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        var s = Math.min(1, maxW / img.naturalWidth);
+        var cv = document.createElement("canvas");
+        cv.width = Math.max(1, Math.round(img.naturalWidth * s));
+        cv.height = Math.max(1, Math.round(img.naturalHeight * s));
+        cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+        URL.revokeObjectURL(url);
+        try { resolve(cv.toDataURL("image/jpeg", quality)); }
+        catch (e) { reject(new Error("A kép feldolgozása nem sikerült.")); }
+      };
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error("Ezt a fájlt nem tudjuk képként megnyitni."));
+      };
+      img.src = url;
+    });
+  }
+
+  function prepareImage(file) {
+    return shrink(file, 1280, 0.72).then(function (d) {
+      if (d.length <= 880000) return d;
+      return shrink(file, 1000, 0.6).then(function (d2) {
+        if (d2.length <= 880000) return d2;
+        return shrink(file, 800, 0.5);
+      });
+    });
+  }
+
+  var proofImage = null;
+
+  function openProof() {
+    proofImage = null;
+    $("pErr").textContent = "";
+    $("pFile").value = "";
+    $("pPrev").hidden = true;
+    $("pHours").value = me ? me.hours : 0;
+    $("pNote").value = "";
+    $("proofDlg").showModal();
+  }
+  $("pCancel").onclick = function () { $("proofDlg").close(); };
+  $("pFile").addEventListener("change", function () {
+    var f = this.files && this.files[0];
+    $("pErr").textContent = "";
+    if (!f) { proofImage = null; $("pPrev").hidden = true; return; }
+    if (f.size > 25 * 1024 * 1024) { $("pErr").textContent = "Ez a fájl túl nagy (max 25 MB)."; return; }
+    $("pErr").textContent = "Kép előkészítése…";
+    prepareImage(f).then(function (d) {
+      proofImage = d;
+      $("pPrev").src = d;
+      $("pPrev").hidden = false;
+      $("pErr").textContent = "";
+    }).catch(function (err) {
+      proofImage = null;
+      $("pErr").textContent = err.message || "A kép feldolgozása nem sikerült.";
+    });
+  });
+
+  $("proofForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var h = Math.round(+$("pHours").value);
+    if (!proofImage) { $("pErr").textContent = "Válassz egy képernyőképet."; return; }
+    if (!isFinite(h) || h < 0 || h > 5000) { $("pErr").textContent = "Az óraszám 0 és 5000 között legyen."; return; }
+    var btn = $("pSend");
+    btn.disabled = true;
+    btn.textContent = "Küldés…";
+    api.proofSubmit(h, me ? me.platform : "Egyeb", proofImage, $("pNote").value)
+      .then(function () {
+        $("proofDlg").close();
+        return loadProof();
+      })
+      .then(function () { renderMine(); })
+      .catch(function (err) { $("pErr").textContent = C.humanError(err); })
+      .then(function () { btn.disabled = false; btn.textContent = "Beküldöm"; });
+  });
 
   /* ---------------- Steam ---------------- */
   var STEAM_MSG = {
@@ -552,7 +664,7 @@
   }
 
   function reload() {
-    return Promise.all([api.fans(), api.crews(), api.weekly(), api.mine()])
+    return Promise.all([api.fans(), api.crews(), api.weekly(), api.mine(), api.proofMine()])
       .then(function (r) {
         fans = r[0];
         crews = {};
@@ -560,6 +672,7 @@
         weekly = {};
         r[2].forEach(function (x) { weekly[x.fan_id] = x.delta; });
         me = r[3];
+        myProof = (r[4] && r[4][0]) || null;
         banner(null);
         render();
       })
