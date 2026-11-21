@@ -16,6 +16,8 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
+/* a rejtés akkor is érvényes legyen, ha az elemnek saját display-e van */
+[hidden]{display:none!important}
 html,body{min-height:100%}
 body{
   margin:0;font-family:var(--body);color:var(--fg);font-size:14px;
@@ -105,6 +107,18 @@ svg.map.drag{cursor:grabbing}
 @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 /* heti kihívás */
 .chcim{font-family:var(--display);font-size:17px;line-height:1.25;color:var(--fg)}
+/* térkép-oszlop: alatta a tippek */
+.mapcol{min-width:0;display:flex;flex-direction:column;gap:18px}
+.tiprow{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.tiprow:last-child{border-bottom:0}
+.tiprow .cnt{font-family:var(--mono);font-size:12px;color:var(--orange);min-width:34px;text-align:center}
+.tiprow .cnt em{display:block;font-style:normal;font-size:9px;color:var(--muted);letter-spacing:.1em}
+.tiprow .txt{font-size:13.5px;line-height:1.55;color:var(--fg)}
+.tiprow .who{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+.tiprow .who b{color:var(--orange);font-weight:700}
+.btn.pulse{border-color:rgba(255,45,149,.55);color:var(--fg);animation:pulsebtn 2.6s ease-in-out infinite}
+.btn.pulse:hover{animation:none;border-color:var(--pink)}
+@keyframes pulsebtn{0%,100%{box-shadow:0 0 0 0 rgba(255,45,149,.45)}50%{box-shadow:0 0 0 9px rgba(255,45,149,0)}}
 .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
 .bar{display:inline-block;width:74px;height:9px;border-radius:5px;background:linear-gradient(90deg,rgba(255,155,39,.15),#ff2d95);vertical-align:middle;margin:0 6px}
 .tip{position:absolute;pointer-events:none;opacity:0;transform:translate(-50%,-125%);background:rgba(8,2,20,.95);border:1px solid rgba(255,45,149,.5);border-radius:10px;padding:7px 10px;font-size:12px;line-height:1.35;white-space:nowrap;z-index:4;box-shadow:0 10px 30px -12px #000;transition:opacity .12s}

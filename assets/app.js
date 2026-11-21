@@ -752,6 +752,27 @@
       $("chDo").disabled = true;
     }).catch(function () { b.disabled = false; });
   };
+  /* --- tippek a főoldalon --- */
+  function loadTips() {
+    if (!api.ready) return;
+    api.tips("").then(function (rows) {
+      var box = $("tipsBox");
+      if (!rows.length) {
+        box.innerHTML = '<div class="empty"><b>Még nincs tipp</b>' +
+          'Te lehetsz az első, aki megoszt valamit a magyar közösséggel.</div>';
+        return;
+      }
+      box.innerHTML = rows.slice(0, 3).map(function (t) {
+        var sz = t.szoveg.length > 190 ? t.szoveg.slice(0, 190) + "…" : t.szoveg;
+        return '<div class="tiprow">' +
+          '<div class="cnt">' + nf(t.szavazat) + "<em>szav.</em></div>" +
+          '<div><div class="txt">' + esc(sz) + "</div>" +
+          '<div class="who"><b>' + esc(C.katLabel(t.kategoria)) + "</b> · " + esc(t.nick) + "</div></div>" +
+          "</div>";
+      }).join("");
+    }).catch(function () { });
+  }
+
   function loadChallenge() {
     if (!api.ready) return;
     api.challenge().then(function (c) { kihivas = c; renderChallenge(); }).catch(function () { });
@@ -816,6 +837,7 @@
     render();
   } else {
     loadChallenge();
+    loadTips();
     reload().then(function () {
       channel = api.channel(
         function () { reload(); },

@@ -10,15 +10,15 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap">
 <link rel="stylesheet" href="assets/style.css">
 <style>
-  .tip{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:linear-gradient(170deg,rgba(255,255,255,.055),rgba(255,255,255,.02));display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
-  .tip .vote{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:52px}
-  .tip .vbtn{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--fg);border-radius:10px;width:44px;height:38px;cursor:pointer;font-size:15px;line-height:1;transition:.15s}
-  .tip .vbtn:hover{border-color:var(--pink);color:var(--pink)}
-  .tip .vbtn.done{border-color:var(--cyan);color:var(--cyan);cursor:default}
-  .tip .vnum{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-  .tip .txt{font-size:14.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
-  .tip .meta{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:8px}
-  .tip .kat{color:var(--orange)}
+  .tipcard{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:linear-gradient(170deg,rgba(255,255,255,.055),rgba(255,255,255,.02));display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+  .tipcard .vote{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:52px}
+  .tipcard .vbtn{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--fg);border-radius:10px;width:44px;height:38px;cursor:pointer;font-size:15px;line-height:1;transition:.15s}
+  .tipcard .vbtn:hover{border-color:var(--pink);color:var(--pink)}
+  .tipcard .vbtn.done{border-color:var(--cyan);color:var(--cyan);cursor:default}
+  .tipcard .vnum{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .tipcard .txt{font-size:14.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+  .tipcard .meta{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+  .tipcard .kat{color:var(--orange)}
   .tiplist{display:flex;flex-direction:column;gap:12px}
   .chips{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 20px}
 </style>
@@ -43,7 +43,7 @@
     </section>
 
     <div class="side">
-      <section class="panel">
+      <section class="panel" id="bekuldes">
         <header><h2>Küldd be a tipped</h2></header>
         <div class="pad" style="display:flex;flex-direction:column;gap:13px">
           <div id="nickWrap">

@@ -41,6 +41,7 @@
   function enter() {
     $("gate").hidden = true;
     $("panelWrap").hidden = false;
+    showSec(sec);
     load();
   }
 
@@ -60,8 +61,72 @@
     }).then(function () { btn.disabled = false; });
   };
   $("pw").addEventListener("keydown", function (e) { if (e.key === "Enter") $("gateBtn").click(); });
+
+  /* --- elfelejtett jelszó --- */
+  function api2(body) {
+    return fetch("/api/admin-reset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (d) {
+        if (!r.ok) { var e = new Error(d.uzenet || "Hiba"); e.code = d.error; throw e; }
+        return d;
+      });
+    });
+  }
+  $("forgot").onclick = function () {
+    var b = this;
+    $("gateErr").textContent = "";
+    b.disabled = true;
+    b.textContent = "Küldés…";
+    api2({}).then(function () {
+      $("resetWrap").hidden = false;
+      $("gateHint").textContent = "Elküldtük a kódot az üzemeltető e-mail-címére. 20 percig érvényes.";
+      b.textContent = "Kód újraküldése";
+    }).catch(function (err) {
+      $("gateErr").textContent = err.message || "Nem sikerült.";
+      b.textContent = "Elfelejtettem a jelszót";
+    }).then(function () { b.disabled = false; });
+  };
+  $("rSave").onclick = function () {
+    var b = this;
+    var kod = $("rkod").value.trim().toUpperCase();
+    var pw = $("rpw").value;
+    $("gateErr").textContent = "";
+    if (kod.length < 4) { $("gateErr").textContent = "Írd be az e-mailben kapott kódot."; return; }
+    if (pw.length < 12) { $("gateErr").textContent = "Az új jelszó legalább 12 karakter legyen."; return; }
+    b.disabled = true;
+    api2({ kod: kod, jelszo: pw }).then(function () {
+      setKey(pw);
+      $("rkod").value = "";
+      $("rpw").value = "";
+      $("resetWrap").hidden = true;
+      enter();
+    }).catch(function (err) {
+      $("gateErr").textContent = err.message || "Nem sikerült.";
+    }).then(function () { b.disabled = false; });
+  };
   $("logout").onclick = function () { setKey(null); showGate(""); };
   $("refresh").onclick = function () { load(); };
+
+  /* --- fülek a szekciók között --- */
+  var sec = "teendok";
+  try { sec = localStorage.getItem("gta6hu_admin_sec") || "teendok"; } catch (e) { }
+  function showSec(s) {
+    sec = s;
+    try { localStorage.setItem("gta6hu_admin_sec", s); } catch (e) { }
+    document.querySelectorAll(".tabbar button[data-sec]").forEach(function (b) {
+      b.classList.toggle("on", b.getAttribute("data-sec") === s);
+    });
+    document.querySelectorAll("section[data-sec]").forEach(function (p) {
+      p.hidden = p.getAttribute("data-sec") !== s;
+    });
+  }
+  document.querySelector(".tabbar").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-sec]");
+    if (b) showSec(b.getAttribute("data-sec"));
+  });
   $("search").addEventListener("input", function () { filter = this.value.trim().toLowerCase(); renderFans(); });
 
   function placeName(id) {
@@ -117,6 +182,8 @@
     if (allTips.length) reszek.push(allTips.length + " tipp");
     if (allReports.length) reszek.push(allReports.length + " jelentés");
     $("sum").textContent = reszek.length ? reszek.join(" · ") + " vár rád" : "nincs nyitott teendő";
+    var teendo = allProofs.length + allTips.length + allReports.length;
+    $("secCount").textContent = teendo ? "(" + teendo + ")" : "";
 
     /* hitelesítésre váró képek */
     $("proofCount").textContent = allProofs.length ? "(" + allProofs.length + ")" : "";

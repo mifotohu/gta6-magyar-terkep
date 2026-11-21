@@ -47,7 +47,7 @@
     $("empty").hidden = tips.length > 0;
     $("list").innerHTML = tips.map(function (t) {
       var volt = !!szavazott[t.id];
-      return '<article class="tip">' +
+      return '<article class="tipcard">' +
         '<div class="vote">' +
         '<button class="vbtn' + (volt ? " done" : "") + '" data-vote="' + esc(t.id) + '" type="button" ' +
         'title="' + (volt ? "Már szavaztál erre" : "Ez bevált nekem") + '">▲</button>' +

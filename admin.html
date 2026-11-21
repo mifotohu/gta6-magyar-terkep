@@ -17,6 +17,9 @@
   .adm .why{font-family:var(--mono);font-size:10.5px;color:#ff9c2b;text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
   .adm .said{font-size:12.5px;color:var(--fg);margin-top:4px}
   .count{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:6px}
+  .tabbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:5;
+    padding:10px 0;background:linear-gradient(180deg,rgba(10,3,24,.96),rgba(10,3,24,.86));backdrop-filter:blur(4px)}
+  .grid.onecol{grid-template-columns:minmax(0,1fr)}
   .shot{display:block;max-width:100%;width:260px;border-radius:10px;border:1px solid var(--line);margin-top:8px}
   .ok{border-color:rgba(90,210,160,.5);color:#5ad2a0}
   .ok:hover{background:rgba(90,210,160,.14);border-color:#5ad2a0}
@@ -36,8 +39,22 @@
         <label for="pw">Admin jelszó</label>
         <input type="password" id="pw" autocomplete="current-password" placeholder="legalább 12 karakter">
       </div>
+      <div id="resetWrap" hidden style="margin-top:12px;display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);padding-top:14px">
+        <div>
+          <label for="rkod">Kód az e-mailből</label>
+          <input type="text" id="rkod" maxlength="8" placeholder="8 karakter" autocomplete="off" style="text-transform:uppercase;letter-spacing:.18em;font-family:var(--mono)">
+        </div>
+        <div>
+          <label for="rpw">Új jelszó</label>
+          <input type="password" id="rpw" autocomplete="new-password" placeholder="legalább 12 karakter">
+        </div>
+        <button class="btn sm ok" id="rSave" type="button">Új jelszó beállítása</button>
+      </div>
       <p class="err" id="gateErr" style="margin:10px 0 0"></p>
       <button class="btn primary" id="gateBtn" type="button" style="margin-top:14px">Belépés</button>
+      <p style="margin:10px 0 0">
+        <button class="btn sm ghost" id="forgot" type="button">Elfelejtettem a jelszót</button>
+      </p>
       <p class="hint" id="gateHint"></p>
     </div>
   </div>
@@ -55,23 +72,29 @@
 
     <div class="banner" id="banner" hidden></div>
 
-    <div class="grid" style="margin-top:18px">
-      <section class="panel" style="margin-bottom:18px">
+    <div class="tabbar">
+      <button class="btn sm on" data-sec="teendok" type="button">Teendők<span class="count" id="secCount"></span></button>
+      <button class="btn sm" data-sec="tartalom" type="button">Tartalom</button>
+      <button class="btn sm" data-sec="emberek" type="button">Emberek</button>
+      <button class="btn sm ghost" id="refresh" type="button" style="margin-left:auto">Frissítés</button>
+    </div>
+
+    <div class="grid onecol" style="margin-top:18px">
+      <section class="panel" data-sec="teendok" style="margin-bottom:18px">
         <header>
           <h2>Hitelesítések<span class="count" id="proofCount"></span></h2>
-          <button class="btn sm" id="refresh" type="button">Frissítés</button>
         </header>
         <ul class="lb adm" id="proofList"></ul>
         <div class="empty" id="proofEmpty" hidden><b>Nincs beküldött kép</b>Ha valaki képpel igazolja az óraszámát, itt jelenik meg, és egy kattintással döntesz róla.</div>
       </section>
 
-      <section class="panel" style="margin-bottom:18px">
+      <section class="panel" data-sec="teendok" style="margin-bottom:18px">
         <header><h2>Beküldött tippek<span class="count" id="tipCount"></span></h2></header>
         <ul class="lb adm" id="tipList"></ul>
         <div class="empty" id="tipEmpty" hidden><b>Nincs új tipp</b>Ha valaki beküld egyet, itt döntesz róla. Az elfogadott tippek azonnal kikerülnek a Tippek oldalra.</div>
       </section>
 
-      <section class="panel">
+      <section class="panel" data-sec="teendok">
         <header>
           <h2>Jelentések<span class="count" id="repCount"></span></h2>
         </header>
@@ -80,7 +103,7 @@
       </section>
 
       <div class="side">
-        <section class="panel">
+        <section class="panel" data-sec="emberek">
           <header>
             <h2>Rajongók<span class="count" id="fanCount"></span></h2>
           </header>
@@ -90,12 +113,12 @@
           <ul class="lb adm" id="fanList"></ul>
         </section>
 
-        <section class="panel">
+        <section class="panel" data-sec="emberek">
           <header><h2>Crew-k<span class="count" id="crewCount"></span></h2></header>
           <ul class="lb adm" id="crewList"></ul>
         </section>
 
-        <section class="panel">
+        <section class="panel" data-sec="tartalom">
           <header><h2>Heti kihívás</h2></header>
           <div class="pad" style="display:flex;flex-direction:column;gap:12px">
             <div>
@@ -113,7 +136,7 @@
           </div>
         </section>
 
-        <section class="panel">
+        <section class="panel" data-sec="tartalom">
           <header>
             <h2>Hirdetések<span class="count" id="bnCount"></span></h2>
             <button class="btn sm" id="bnNew" type="button">Új hirdetés</button>
