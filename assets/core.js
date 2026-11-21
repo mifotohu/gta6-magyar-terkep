@@ -51,8 +51,30 @@
     NINCS_JOGOSULTSAG: "Hibás jelszó.",
     MAR_VAN_ADMIN: "Az admin jelszó már be van állítva.",
     ROVID_JELSZO: "A jelszó legalább 12 karakter legyen.",
-    CSAK_HTTPS: "A címeknek https://-sel kell kezdődniük."
+    CSAK_HTTPS: "A címeknek https://-sel kell kezdődniük.",
+    TUL_SOK_TIPP: "Erről a hálózatról ma már három tipp érkezett. Holnap jöhet a következő.",
+    ROVID_TIPP: "A tipp legalább 10 karakter legyen — írd le pár szóval, miről van szó.",
+    ROVID_CIM: "A cím legalább 3 karakter legyen.",
+    KELL_NEV: "Adj nevet a hirdetésnek."
   };
+
+  /* játékmódok */
+  var MODES = { story: "Story", online: "Online", szabad: "Szabad barangolás" };
+  function modeLabel(m) { return MODES[m] || ""; }
+
+  /* tipp-kategóriák */
+  var KATEGORIAK = [
+    ["beallitasok", "Beállítások"],
+    ["penz", "Pénz és üzletek"],
+    ["kuldetesek", "Küldetések"],
+    ["jarmuvek", "Járművek"],
+    ["online", "Online"],
+    ["egyeb", "Egyéb"]
+  ];
+  function katLabel(k) {
+    for (var i = 0; i < KATEGORIAK.length; i++) { if (KATEGORIAK[i][0] === k) return KATEGORIAK[i][1]; }
+    return k;
+  }
   function humanError(err) {
     if (!err) return "Ismeretlen hiba.";
     var m = String(err.message || err);
@@ -90,7 +112,7 @@
     fans: function () {
       need();
       return sb.from("fans")
-        .select("id,nick,place_id,hours,platform,note,crew_id,created_at,updated_at,steam_hours,steam_verified_at,proof_verified_at")
+        .select("id,nick,place_id,hours,platform,note,crew_id,created_at,updated_at,steam_hours,steam_verified_at,proof_verified_at,mode")
         .order("hours", { ascending: false })
         .limit(5000)
         .then(function (r) { if (r.error) throw r.error; return r.data || []; });
@@ -140,7 +162,8 @@
         p_hours: rec.hours,
         p_platform: rec.platform,
         p_note: rec.note || null,
-        p_crew_id: rec.crew_id || null
+        p_crew_id: rec.crew_id || null,
+        p_mode: rec.mode || null
       }).then(function (r) {
         if (r.error) throw r.error;
         rememberFan(r.data);
@@ -178,6 +201,66 @@
     report: function (fanId, reason, note) {
       need();
       return sb.rpc("report_fan", { p_fan_id: fanId, p_reason: reason, p_note: note || null })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+
+    /* --- tippek --- */
+    tips: function (kat) {
+      need();
+      return sb.rpc("tips_public", { p_kategoria: kat || null })
+        .then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+    tipSubmit: function (nick, kat, szoveg) {
+      need();
+      return sb.rpc("tip_submit", { p_token: token(), p_nick: nick || null, p_kategoria: kat, p_szoveg: szoveg })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+    tipVote: function (id) {
+      need();
+      return sb.rpc("tip_vote", { p_tip_id: id })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+    tipsMine: function () {
+      need();
+      return sb.rpc("tips_mine", { p_token: token() })
+        .then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+    adminTips: function (key) {
+      need();
+      return sb.rpc("admin_tips", { p_key: key })
+        .then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+    adminTipDecide: function (key, id, ok) {
+      need();
+      return sb.rpc("admin_tip_decide", { p_key: key, p_id: id, p_ok: ok })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+
+    /* --- heti kihívás --- */
+    challenge: function () {
+      need();
+      return sb.rpc("challenge_now")
+        .then(function (r) { if (r.error) throw r.error; return (r.data || [])[0] || null; });
+    },
+    challengeDo: function (id) {
+      need();
+      return sb.rpc("challenge_do", { p_id: id })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+    adminChallenges: function (key) {
+      need();
+      return sb.rpc("admin_challenges", { p_key: key })
+        .then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+    adminChallengeSave: function (key, c) {
+      need();
+      return sb.rpc("admin_challenge_save", {
+        p_key: key, p_id: c.id || null, p_cim: c.cim, p_szoveg: c.szoveg || null, p_aktiv: !!c.aktiv
+      }).then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+    adminChallengeDelete: function (key, id) {
+      need();
+      return sb.rpc("admin_challenge_delete", { p_key: key, p_id: id })
         .then(function (r) { if (r.error) throw r.error; return r.data; });
     },
 
@@ -324,6 +407,7 @@
 
   w.GTACore = {
     sb: sb, api: api, token: token, savedFanId: savedFanId,
-    esc: esc, nf: nf, platLabel: platLabel, days: days, humanError: humanError
+    esc: esc, nf: nf, platLabel: platLabel, days: days, humanError: humanError,
+    MODES: MODES, modeLabel: modeLabel, KATEGORIAK: KATEGORIAK, katLabel: katLabel
   };
 })(window);

@@ -95,6 +95,15 @@
     barChart($("platChart"), Object.keys(plat).map(function (k) { return { k: k, v: plat[k] }; })
       .sort(function (a, b) { return b.v - a.v; }));
 
+    /* játékmódok */
+    var mod = {};
+    fans.forEach(function (f) {
+      var k = f.mode ? C.modeLabel(f.mode) : "Nem mondta meg";
+      mod[k] = (mod[k] || 0) + 1;
+    });
+    barChart($("modeChart"), Object.keys(mod).map(function (k) { return { k: k, v: mod[k] }; })
+      .sort(function (a, b) { return b.v - a.v; }));
+
     /* rangok */
     var rank = {};
     fans.forEach(function (f) { var r = D.rankOf(f.hours); rank[r.name] = rank[r.name] || { v: 0, c: r.color }; rank[r.name].v++; });

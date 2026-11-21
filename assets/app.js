@@ -5,8 +5,8 @@
   var $ = function (id) { return document.getElementById(id); };
   var esc = C.esc, nf = C.nf;
 
-  var fans = [], crews = {}, weekly = {}, online = {}, me = null;
-  var tab = "place", sel = null, map = null, channel = null;
+  var fansAll = [], fans = [], crews = {}, weekly = {}, online = {}, me = null;
+  var tab = "place", sel = null, map = null, channel = null, modeSzuro = "";
   var steamOn = false; /* csak akkor kínáljuk a Steam-hitelesítést, ha a szerveren be van kapcsolva */
 
   /* kinek küldtünk már jelentést ebből a böngészőből */
@@ -150,7 +150,8 @@
             '<span class="nm">' + (online[f.id] ? '<span class="crewdot" style="background:#5ad2a0"></span>' : "") +
             (cw ? '<span class="crewdot" style="background:' + esc(cw.color) + '"></span>' : "") +
             esc(f.nick) + " " + rankTag(f.hours) + steamTag(f) +
-            "<em>" + (pl ? esc(pl.short) : "") + " · " + esc(C.platLabel(f.platform)) + "</em></span>" +
+            "<em>" + (pl ? esc(pl.short) : "") + " · " + esc(C.platLabel(f.platform)) +
+            (f.mode ? " · " + esc(C.modeLabel(f.mode)) : "") + "</em></span>" +
             '<span class="vl">' + nf(f.hours) + " ó" + (weekly[f.id] ? "<em>+" + nf(weekly[f.id]) + "</em>" : "") + "</span></li>";
         }).join("");
       note.innerHTML = '<p class="note">A rang az összes játszott órából jön: Újonc → Leonida Veterán.</p>';
@@ -507,6 +508,7 @@
       $("fNick").value = me.nick;
       $("fHours").value = me.hours;
       $("fPlat").value = me.platform;
+      $("fMode").value = me.mode || "";
       $("fNote").value = me.note || "";
       var pl = D.BY_ID[me.place_id];
       $("fPlace").value = pl ? pl.label : "";
@@ -540,7 +542,8 @@
     btn.textContent = "Mentés…";
     api.save({
       nick: nick, place_id: pl.id, hours: h,
-      platform: $("fPlat").value, note: $("fNote").value.trim(), crew_id: $("fCrew").value || null
+      platform: $("fPlat").value, note: $("fNote").value.trim(),
+      crew_id: $("fCrew").value || null, mode: $("fMode").value || null
     }).then(function () {
       dlg.close();
       return reload();
@@ -693,10 +696,71 @@
     b.textContent = msg;
   }
 
+  /* --- szűrés játékmódra --- */
+  function szuresAlkalmaz() {
+    fans = modeSzuro ? fansAll.filter(function (f) { return f.mode === modeSzuro; }) : fansAll.slice();
+    render();
+  }
+  $("modeFilter").addEventListener("change", function () {
+    modeSzuro = this.value;
+    sel = null;
+    $("cityPanel").hidden = true;
+    szuresAlkalmaz();
+  });
+
+  /* --- élő hírfolyam --- */
+  function renderTicker() {
+    var row = $("tickrow");
+    var ujak = fansAll.slice().sort(function (a, b) {
+      return new Date(b.created_at) - new Date(a.created_at);
+    }).slice(0, 10);
+    if (ujak.length < 3) { $("ticker").hidden = true; return; }
+    var html = ujak.map(function (f) {
+      var pl = D.BY_ID[f.place_id];
+      return "<span><b>" + esc(f.nick) + "</b> · " + (pl ? esc(pl.short) : "") +
+        " · <i>" + nf(f.hours) + " óra</i></span>";
+    }).join("");
+    /* kétszer tesszük be, hogy a futó sáv ne szakadjon meg */
+    row.innerHTML = html + html;
+    $("ticker").hidden = false;
+  }
+
+  /* --- heti kihívás --- */
+  var kihivas = null;
+  function renderChallenge() {
+    if (!kihivas) { $("chPanel").hidden = true; return; }
+    $("chCim").textContent = kihivas.cim;
+    $("chSzoveg").textContent = kihivas.szoveg || "";
+    $("chSzoveg").hidden = !kihivas.szoveg;
+    $("chCount").textContent = kihivas.teljesitve
+      ? nf(kihivas.teljesitve) + " embernek sikerült"
+      : "Te lehetsz az első, akinek sikerül.";
+    $("chPanel").hidden = false;
+  }
+  $("chDo").onclick = function () {
+    if (!kihivas) return;
+    var b = this;
+    b.disabled = true;
+    api.challengeDo(kihivas.id).then(function (uj) {
+      b.textContent = uj ? "Megvan!" : "Ezt már jelezted";
+      return api.challenge();
+    }).then(function (c) {
+      kihivas = c;
+      var szoveg = b.textContent;
+      renderChallenge();
+      $("chDo").textContent = szoveg;
+      $("chDo").disabled = true;
+    }).catch(function () { b.disabled = false; });
+  };
+  function loadChallenge() {
+    if (!api.ready) return;
+    api.challenge().then(function (c) { kihivas = c; renderChallenge(); }).catch(function () { });
+  }
+
   function reload() {
     return Promise.all([api.fans(), api.crews(), api.weekly(), api.mine(), api.proofMine()])
       .then(function (r) {
-        fans = r[0];
+        fansAll = r[0];
         crews = {};
         r[1].forEach(function (c) { crews[c.id] = c; });
         weekly = {};
@@ -704,7 +768,8 @@
         me = r[3];
         myProof = (r[4] && r[4][0]) || null;
         banner(null);
-        render();
+        szuresAlkalmaz();
+        renderTicker();
       })
       .catch(function (err) {
         banner(C.humanError(err));
@@ -750,6 +815,7 @@
     banner("Az adatbázis nem érhető el ebből a nézetből, ezért a térkép üresen marad.");
     render();
   } else {
+    loadChallenge();
     reload().then(function () {
       channel = api.channel(
         function () { reload(); },

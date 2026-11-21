@@ -82,6 +82,7 @@
   }
 
   var allFans = [], allCrews = [], allReports = [], allProofs = [], allBanners = [];
+  var allTips = [], allCh = [];
 
   function banner(msg) {
     $("banner").hidden = !msg;
@@ -91,14 +92,17 @@
   function load() {
     if (!key) { showGate(""); return; }
     Promise.all([api.adminReports(key), api.adminFans(key), api.adminCrews(key),
-                 api.adminProofs(key), api.adminConfig(key), api.adminBanners(key)])
+                 api.adminProofs(key), api.adminConfig(key), api.adminBanners(key),
+                 api.adminTips(key), api.adminChallenges(key)])
       .then(function (r) {
         allReports = r[0]; allFans = r[1]; allCrews = r[2]; allProofs = r[3];
-        allBanners = r[5];
+        allBanners = r[5]; allTips = r[6]; allCh = r[7];
         fillConfig(r[4]);
         banner(null);
         render();
         renderBanners();
+        renderTips();
+        renderCh();
       })
       .catch(function (err) {
         var m = String(err && err.message || "");
@@ -108,11 +112,11 @@
   }
 
   function render() {
-    var tenni = allReports.length + allProofs.length;
-    $("sum").textContent = tenni
-      ? (allProofs.length ? allProofs.length + " kép vár, " : "") +
-        allReports.length + " jelentett bejegyzés"
-      : "nincs nyitott teendő";
+    var reszek = [];
+    if (allProofs.length) reszek.push(allProofs.length + " kép");
+    if (allTips.length) reszek.push(allTips.length + " tipp");
+    if (allReports.length) reszek.push(allReports.length + " jelentés");
+    $("sum").textContent = reszek.length ? reszek.join(" · ") + " vár rád" : "nincs nyitott teendő";
 
     /* hitelesítésre váró képek */
     $("proofCount").textContent = allProofs.length ? "(" + allProofs.length + ")" : "";
@@ -178,6 +182,50 @@
         "</li>";
     }).join("") : '<li><span class="nm" style="font-weight:400;color:var(--muted)">Nincs találat.</span></li>';
   }
+
+  /* --- beküldött tippek --- */
+  function renderTips() {
+    $("tipCount").textContent = allTips.length ? "(" + allTips.length + ")" : "";
+    $("tipEmpty").hidden = allTips.length > 0;
+    $("tipList").innerHTML = allTips.map(function (t) {
+      return "<li>" +
+        '<span class="nm" style="white-space:normal">' + esc(t.nick) +
+        "<em>" + esc(C.katLabel(t.kategoria)) + " · " + esc(when(t.created_at)) + "</em>" +
+        '<div class="said" style="white-space:pre-wrap">' + esc(t.szoveg) + "</div>" +
+        "</span>" +
+        '<span class="acts">' +
+        '<button class="btn sm ok" data-tipok="' + esc(t.id) + '" type="button">Kirakom</button>' +
+        '<button class="btn sm danger" data-tipno="' + esc(t.id) + '" type="button">Elutasítom</button>' +
+        "</span></li>";
+    }).join("");
+  }
+
+  /* --- heti kihívás --- */
+  function renderCh() {
+    $("chList").innerHTML = allCh.slice(0, 8).map(function (c) {
+      return "<li>" +
+        '<span class="nm" style="white-space:normal">' + esc(c.cim) +
+        "<em>" + (c.aktiv ? "AKTÍV" : "lezárt") + " · " + nf(c.teljesitve) + " teljesítés · " + esc(when(c.created_at)) + "</em></span>" +
+        '<span class="acts"><button class="btn sm danger" data-chdel="' + esc(c.id) + '" type="button">Törlés</button></span>' +
+        "</li>";
+    }).join("");
+  }
+  $("chSave").onclick = function () {
+    if (!key) return;
+    var b = this;
+    var cim = $("chCimIn").value.trim();
+    $("chErr").textContent = "";
+    if (cim.length < 3) { $("chErr").textContent = "A cím legalább 3 karakter legyen."; return; }
+    b.disabled = true;
+    api.adminChallengeSave(key, { cim: cim, szoveg: $("chSzovegIn").value.trim(), aktiv: true })
+      .then(function () {
+        $("chCimIn").value = "";
+        $("chSzovegIn").value = "";
+        return load();
+      })
+      .catch(function (err) { $("chErr").textContent = C.humanError(err); })
+      .then(function () { b.disabled = false; });
+  };
 
   /* --- hirdetések --- */
   function fillConfig(c) {
@@ -289,9 +337,25 @@
   }
 
   document.addEventListener("click", function (e) {
-    var b = e.target.closest("button[data-del],button[data-delcrew],button[data-clear],button[data-proofok],button[data-proofno],button[data-bnedit],button[data-bnreset],button[data-bndel]");
+    var b = e.target.closest("button[data-del],button[data-delcrew],button[data-clear],button[data-proofok],button[data-proofno],button[data-bnedit],button[data-bnreset],button[data-bndel],button[data-tipok],button[data-tipno],button[data-chdel]");
     if (!b || !key) return;
     var id;
+    if ((id = b.getAttribute("data-tipok"))) {
+      b.disabled = true;
+      api.adminTipDecide(key, id, true).then(load).catch(function (err) { b.disabled = false; banner(C.humanError(err)); });
+      return;
+    }
+    if ((id = b.getAttribute("data-tipno"))) {
+      b.disabled = true;
+      api.adminTipDecide(key, id, false).then(load).catch(function (err) { b.disabled = false; banner(C.humanError(err)); });
+      return;
+    }
+    if ((id = b.getAttribute("data-chdel"))) {
+      arm(b, function () {
+        api.adminChallengeDelete(key, id).then(load).catch(function (err) { banner(C.humanError(err)); });
+      });
+      return;
+    }
     if ((id = b.getAttribute("data-bnedit"))) {
       var rec = allBanners.filter(function (x) { return x.id === id; })[0];
       if (rec) openBanner(rec);

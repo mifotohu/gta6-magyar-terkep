@@ -44,6 +44,12 @@
       <header>
         <h2>Magyarország · élő térkép</h2>
         <div class="tabs">
+          <select id="modeFilter" aria-label="Szűrés játékmódra" style="width:auto;padding:6px 8px;font-size:12px">
+            <option value="">Minden mód</option>
+            <option value="story">Story</option>
+            <option value="online">Online</option>
+            <option value="szabad">Szabad barangolás</option>
+          </select>
           <button class="btn sm on" id="vHu" type="button">Ország</button>
           <button class="btn sm" id="vBp" type="button">Budapest</button>
           <button class="btn sm" id="vHeat" type="button">Hőtérkép</button>
@@ -57,6 +63,7 @@
         </div>
         <div class="tip" id="tip" aria-hidden="true"></div>
       </div>
+      <div class="ticker" id="ticker" hidden><div class="tickrow" id="tickrow"></div></div>
       <div class="mapfoot">
         <div class="legend" id="legend">
           <span><i style="background:linear-gradient(135deg,#ffd66e,#ff2d95)"></i>rajongók</span>
@@ -71,6 +78,18 @@
       <section class="panel pad">
         <button class="btn primary" id="openForm" type="button">Bejelölöm magam</button>
         <div id="mineBox" style="margin-top:14px"></div>
+      </section>
+
+      <section class="panel" id="chPanel" hidden>
+        <header><h2>A hét kihívása</h2></header>
+        <div class="pad">
+          <div class="chcim" id="chCim"></div>
+          <p class="note" id="chSzoveg" style="margin:6px 0 0"></p>
+          <div style="display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap">
+            <button class="btn sm" id="chDo" type="button">Megcsináltam</button>
+            <span class="note" id="chCount"></span>
+          </div>
+        </div>
       </section>
 
       <section class="panel">
@@ -107,6 +126,7 @@
 
   <footer>
     <nav>
+      <a href="tippek.html">Tippek</a>
       <a href="stats.html">Statisztikák</a>
       <a href="embed.html">Beágyazható térkép</a>
       <a href="adatkezeles.html">Adatkezelés</a>
@@ -148,11 +168,22 @@
           </select>
         </div>
       </div>
-      <div>
-        <label for="fCrew">Crew</label>
-        <select id="fCrew"><option value="">— nincs —</option></select>
-        <p class="hint">Nincs még crew-d? Mentés után a saját kártyádon tudsz alapítani egyet.</p>
+      <div class="two">
+        <div>
+          <label for="fCrew">Crew</label>
+          <select id="fCrew"><option value="">— nincs —</option></select>
+        </div>
+        <div>
+          <label for="fMode">Melyik módban tolod?</label>
+          <select id="fMode">
+            <option value="">— nem mondom meg —</option>
+            <option value="story">Story</option>
+            <option value="online">Online</option>
+            <option value="szabad">Szabad barangolás</option>
+          </select>
+        </div>
       </div>
+      <p class="hint" style="margin-top:-6px">Nincs még crew-d? Mentés után a saját kártyádon tudsz alapítani egyet.</p>
       <div>
         <label for="fNote">Rövid üzenet (opcionális)</label>
         <textarea id="fNote" maxlength="90" placeholder="pl. Leonida hív, a munka várhat."></textarea>

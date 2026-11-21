@@ -65,6 +65,12 @@
         <div class="empty" id="proofEmpty" hidden><b>Nincs beküldött kép</b>Ha valaki képpel igazolja az óraszámát, itt jelenik meg, és egy kattintással döntesz róla.</div>
       </section>
 
+      <section class="panel" style="margin-bottom:18px">
+        <header><h2>Beküldött tippek<span class="count" id="tipCount"></span></h2></header>
+        <ul class="lb adm" id="tipList"></ul>
+        <div class="empty" id="tipEmpty" hidden><b>Nincs új tipp</b>Ha valaki beküld egyet, itt döntesz róla. Az elfogadott tippek azonnal kikerülnek a Tippek oldalra.</div>
+      </section>
+
       <section class="panel">
         <header>
           <h2>Jelentések<span class="count" id="repCount"></span></h2>
@@ -87,6 +93,24 @@
         <section class="panel">
           <header><h2>Crew-k<span class="count" id="crewCount"></span></h2></header>
           <ul class="lb adm" id="crewList"></ul>
+        </section>
+
+        <section class="panel">
+          <header><h2>Heti kihívás</h2></header>
+          <div class="pad" style="display:flex;flex-direction:column;gap:12px">
+            <div>
+              <label for="chCimIn">Cím</label>
+              <input type="text" id="chCimIn" maxlength="90" placeholder="pl. Ezen a héten gyűjts 10 órát" autocomplete="off">
+            </div>
+            <div>
+              <label for="chSzovegIn">Leírás (opcionális)</label>
+              <textarea id="chSzovegIn" maxlength="400" placeholder="Pár mondat arról, mi a feladat."></textarea>
+            </div>
+            <p class="err" id="chErr"></p>
+            <button class="btn sm ok" id="chSave" type="button">Kihívás indítása</button>
+            <p class="hint">Mindig egy kihívás aktív: az új indítása lezárja az előzőt. A főoldalon jelenik meg, „Megcsináltam" gombbal.</p>
+            <ul class="lb adm" id="chList" style="margin-top:4px"></ul>
+          </div>
         </section>
 
         <section class="panel">

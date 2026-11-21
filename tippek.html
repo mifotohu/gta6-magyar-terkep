@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tippek — GTA VI Magyar Térkép</title>
+<meta name="description" content="Magyar GTA VI tippek és beállítások a játékosoktól: beállítások, pénz, küldetések, járművek, online. Szavazz a legjobbakra, vagy küldd be a sajátodat.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .tip{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:linear-gradient(170deg,rgba(255,255,255,.055),rgba(255,255,255,.02));display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+  .tip .vote{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:52px}
+  .tip .vbtn{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--fg);border-radius:10px;width:44px;height:38px;cursor:pointer;font-size:15px;line-height:1;transition:.15s}
+  .tip .vbtn:hover{border-color:var(--pink);color:var(--pink)}
+  .tip .vbtn.done{border-color:var(--cyan);color:var(--cyan);cursor:default}
+  .tip .vnum{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .tip .txt{font-size:14.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+  .tip .meta{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+  .tip .kat{color:var(--orange)}
+  .tiplist{display:flex;flex-direction:column;gap:12px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow"><b>GTA VI</b> · Magyar rajongói térkép</p>
+  <h2 class="page">Tippek a játékosoktól</h2>
+  <p class="lede">Amit a magyar közösség összeszedett — <strong>nem a kiadó, nem egy szerkesztőség</strong>, hanem azok, akik tolják. Szavazz arra, ami bevált, és küldd be a sajátodat.</p>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="grid">
+    <section>
+      <div class="tiplist" id="list"></div>
+      <div class="panel empty" id="empty" hidden>
+        <b>Itt még nincs tipp</b>
+        Ebben a kategóriában még senki nem osztott meg semmit. Lehetsz te az első — a jobb oldali dobozban.
+      </div>
+    </section>
+
+    <div class="side">
+      <section class="panel">
+        <header><h2>Küldd be a tipped</h2></header>
+        <div class="pad" style="display:flex;flex-direction:column;gap:13px">
+          <div id="nickWrap">
+            <label for="tNick">Becenév</label>
+            <input type="text" id="tNick" maxlength="22" placeholder="pl. ViceKing_HU" autocomplete="off">
+            <p class="hint">Ha már bejelölted magad a térképen, onnan vesszük a nevedet.</p>
+          </div>
+          <div>
+            <label for="tKat">Kategória</label>
+            <select id="tKat"></select>
+          </div>
+          <div>
+            <label for="tSzoveg">A tipp</label>
+            <textarea id="tSzoveg" maxlength="600" style="min-height:130px" placeholder="Írd le röviden és konkrétan. Ami neked bevált, másnak is időt spórol."></textarea>
+            <p class="hint"><span id="tCount">0</span>/600 karakter</p>
+          </div>
+          <p class="err" id="tErr"></p>
+          <button class="btn primary" id="tSend" type="button" style="font-size:14px;padding:12px">Beküldöm</button>
+          <p class="hint">Minden tipp átnézésen megy át, mielőtt kikerül. Hálózatonként napi 3 beküldés.</p>
+          <div id="tMine"></div>
+        </div>
+      </section>
+
+      <section class="panel pad">
+        <p class="note"><b>Mitől lesz jó egy tipp?</b> Legyen konkrét és ellenőrizhető. „Jó a játék" senkinek nem segít; „a beállításokban ez és ez a kapcsoló sokat javít a képsebességen" viszont igen.</p>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    <nav>
+      <a href="index.html">Vissza a térképre</a>
+      <a href="stats.html">Statisztikák</a>
+      <a href="adatkezeles.html">Adatkezelés</a>
+    </nav>
+    <p><b>Nem hivatalos rajongói oldal.</b> A tippeket a látogatók küldik be; nem ellenőrzött, hivatalos információk. <b>Az oldal AI eszközökkel készült, és a rendszer hibázhat.</b> Személyes és bankkártyaadatot nem kérünk be; az oldal ingyenesen használható.</p>
+  </footer>
+</div>
+
+<script src="assets/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="assets/core.js"></script>
+<script src="assets/tips.js"></script>
+</body>
+</html>
