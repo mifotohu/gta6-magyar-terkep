@@ -184,7 +184,7 @@
     /* --- oldalbeállítások (banner, támogatás) --- */
     config: function () {
       need();
-      return sb.from("site_config").select("banner_on,banner_image,banner_link,banner_alt,donate_url").limit(1)
+      return sb.from("site_config").select("donate_url,banner_delay_ms").limit(1)
         .then(function (r) { if (r.error) throw r.error; return (r.data || [])[0] || null; });
     },
     adminConfig: function (key) {
@@ -198,6 +198,36 @@
         p_key: key, p_on: !!c.banner_on, p_image: c.banner_image || null,
         p_link: c.banner_link || null, p_alt: c.banner_alt || null, p_donate: c.donate_url || null
       }).then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+
+    /* --- hirdetések (admin) --- */
+    adminBanners: function (key) {
+      need();
+      return sb.rpc("admin_banners", { p_key: key })
+        .then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+    adminBannerSave: function (key, b) {
+      need();
+      return sb.rpc("admin_banner_save", {
+        p_key: key, p_id: b.id || null, p_nev: b.nev, p_image: b.image,
+        p_link: b.link || null, p_alt: b.alt || null,
+        p_aktiv: !!b.aktiv, p_sorrend: b.sorrend || 0
+      }).then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+    adminBannerDelete: function (key, id) {
+      need();
+      return sb.rpc("admin_banner_delete", { p_key: key, p_id: id })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+    adminBannerReset: function (key, id) {
+      need();
+      return sb.rpc("admin_banner_reset", { p_key: key, p_id: id })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+    adminDelaySet: function (key, ms) {
+      need();
+      return sb.rpc("admin_delay_set", { p_key: key, p_ms: ms })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
     },
 
     /* értesítés a moderátornak; ha nincs beállítva, csendben nem csinál semmit */

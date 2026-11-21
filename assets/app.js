@@ -726,20 +726,11 @@
     try { history.replaceState(null, "", location.pathname); } catch (e) { }
   })();
 
-  /* hirdetőhely és támogatás-link az adminban beállított értékekből */
+  /* a hirdetőhelyet a banner.js tölti fel (forgatás + mérés) */
+  if (w.GTABanner) w.GTABanner.mount($("promo"));
+
+  /* támogatás-link az adminban beállított értékből */
   function renderConfig(cfg) {
-    var p = $("promo");
-    if (cfg && cfg.banner_on && cfg.banner_image) {
-      var img = '<img src="' + esc(cfg.banner_image) + '" alt="' + esc(cfg.banner_alt || "Hirdetés") + '" loading="lazy">';
-      p.innerHTML = '<div class="lab">Hirdetés</div>' +
-        (cfg.banner_link
-          ? '<a href="' + esc(cfg.banner_link) + '" target="_blank" rel="noopener nofollow sponsored">' + img + "</a>"
-          : img);
-      p.hidden = false;
-    } else {
-      p.hidden = true;
-      p.innerHTML = "";
-    }
     if (cfg && cfg.donate_url) {
       $("donateLink").href = cfg.donate_url;
       $("donateWrap").hidden = false;

@@ -81,7 +81,7 @@
     return String(s || "").split(", ").map(function (r) { return REASONS[r] || r; }).join(" · ");
   }
 
-  var allFans = [], allCrews = [], allReports = [], allProofs = [];
+  var allFans = [], allCrews = [], allReports = [], allProofs = [], allBanners = [];
 
   function banner(msg) {
     $("banner").hidden = !msg;
@@ -91,12 +91,14 @@
   function load() {
     if (!key) { showGate(""); return; }
     Promise.all([api.adminReports(key), api.adminFans(key), api.adminCrews(key),
-                 api.adminProofs(key), api.adminConfig(key)])
+                 api.adminProofs(key), api.adminConfig(key), api.adminBanners(key)])
       .then(function (r) {
         allReports = r[0]; allFans = r[1]; allCrews = r[2]; allProofs = r[3];
+        allBanners = r[5];
         fillConfig(r[4]);
         banner(null);
         render();
+        renderBanners();
       })
       .catch(function (err) {
         var m = String(err && err.message || "");
@@ -177,48 +179,101 @@
     }).join("") : '<li><span class="nm" style="font-weight:400;color:var(--muted)">Nincs találat.</span></li>';
   }
 
-  /* --- hirdetőhely és támogatás --- */
+  /* --- hirdetések --- */
   function fillConfig(c) {
     c = c || {};
-    $("cbOn").checked = !!c.banner_on;
-    $("cbImage").value = c.banner_image || "";
-    $("cbLink").value = c.banner_link || "";
-    $("cbAlt").value = c.banner_alt || "";
-    $("cbDonate").value = c.donate_url || "";
-    showCode();
+    $("bnDonate").value = c.donate_url || "";
+    $("bnDelay").value = c.banner_delay_ms || 4000;
+    $("bnCode").textContent = '<script src="' + location.origin + '/assets/banner.js" data-width="300" async><\/script>';
   }
-  function showCode() {
-    var img = $("cbImage").value.trim();
-    var link = $("cbLink").value.trim();
-    var alt = $("cbAlt").value.trim() || "Hirdetés";
-    if (!img) { $("cbCodeWrap").hidden = true; return; }
-    var tag = '<img src="' + img + '" alt="' + alt + '" style="max-width:100%;height:auto">';
-    $("cbCode").textContent = link
-      ? '<a href="' + link + '" target="_blank" rel="noopener nofollow sponsored">' + tag + "</a>"
-      : tag;
-    $("cbCodeWrap").hidden = false;
+
+  var szerkesztett = null;
+
+  function ctr(b) {
+    var m = Number(b.megjelenes || 0), k = Number(b.kattintas || 0);
+    return m ? ((k / m) * 100).toFixed(1) + "%" : "—";
   }
-  ["cbImage", "cbLink", "cbAlt"].forEach(function (id) {
-    $(id).addEventListener("input", showCode);
-  });
+
+  function renderBanners() {
+    $("bnCount").textContent = allBanners.length ? "(" + allBanners.length + ")" : "";
+    $("bnEmpty").hidden = allBanners.length > 0;
+    $("bnList").innerHTML = allBanners.map(function (b) {
+      return "<li>" +
+        '<span class="nm" style="white-space:normal">' + esc(b.nev) +
+        "<em>" + (b.aktiv ? "aktív" : "szünetel") + " · sorrend " + b.sorrend + "</em>" +
+        '<div class="why">' + nf(b.megjelenes) + " megjelenés · " + nf(b.kattintas) + " kattintás · CTR " + ctr(b) + "</div>" +
+        '<img class="shot" src="' + esc(b.image) + '" alt="" style="width:200px">' +
+        "</span>" +
+        '<span class="acts">' +
+        '<button class="btn sm" data-bnedit="' + esc(b.id) + '" type="button">Szerkeszt</button>' +
+        '<button class="btn sm ghost" data-bnreset="' + esc(b.id) + '" type="button">Számláló null</button>' +
+        '<button class="btn sm danger" data-bndel="' + esc(b.id) + '" type="button">Törlés</button>' +
+        "</span></li>";
+    }).join("");
+  }
+
+  function openBanner(b) {
+    szerkesztett = b ? b.id : null;
+    $("bnErr").textContent = "";
+    $("bnNev").value = b ? b.nev : "";
+    $("bnImage").value = b ? b.image : "";
+    $("bnLink").value = (b && b.link) || "";
+    $("bnAlt").value = (b && b.alt) || "";
+    $("bnSorrend").value = b ? b.sorrend : 0;
+    $("bnAktiv").value = (!b || b.aktiv) ? "1" : "0";
+    bnPreview();
+    $("bnForm").hidden = false;
+    $("bnNev").focus();
+  }
+  function bnPreview() {
+    var v = $("bnImage").value.trim();
+    if (v.indexOf("https://") === 0) { $("bnPrev").src = v; $("bnPrev").hidden = false; }
+    else { $("bnPrev").hidden = true; }
+  }
+  $("bnImage").addEventListener("input", bnPreview);
+  $("bnNew").onclick = function () { openBanner(null); };
+  $("bnCancel").onclick = function () { $("bnForm").hidden = true; szerkesztett = null; };
+
+  $("bnSave").onclick = function () {
+    if (!key) return;
+    var btn = this;
+    $("bnErr").textContent = "";
+    var rec = {
+      id: szerkesztett,
+      nev: $("bnNev").value.trim(),
+      image: $("bnImage").value.trim(),
+      link: $("bnLink").value.trim(),
+      alt: $("bnAlt").value.trim(),
+      aktiv: $("bnAktiv").value === "1",
+      sorrend: Math.round(+$("bnSorrend").value) || 0
+    };
+    if (rec.nev.length < 1) { $("bnErr").textContent = "Adj nevet a hirdetésnek."; return; }
+    if (rec.image.indexOf("https://") !== 0) { $("bnErr").textContent = "A kép címének https://-sel kell kezdődnie."; return; }
+    btn.disabled = true;
+    api.adminBannerSave(key, rec).then(function () {
+      $("bnForm").hidden = true;
+      szerkesztett = null;
+      return load();
+    }).catch(function (err) {
+      $("bnErr").textContent = C.humanError(err);
+    }).then(function () { btn.disabled = false; });
+  };
+
   $("cbSave").onclick = function () {
     if (!key) return;
     var b = this;
     $("cbErr").textContent = "";
     b.disabled = true;
     b.textContent = "Mentés…";
-    api.adminConfigSet(key, {
-      banner_on: $("cbOn").checked,
-      banner_image: $("cbImage").value.trim(),
-      banner_link: $("cbLink").value.trim(),
-      banner_alt: $("cbAlt").value.trim(),
-      donate_url: $("cbDonate").value.trim()
-    }).then(function () {
+    Promise.all([
+      api.adminDelaySet(key, Math.round(+$("bnDelay").value) || 4000),
+      api.adminConfigSet(key, { banner_on: false, donate_url: $("bnDonate").value.trim() })
+    ]).then(function () {
       b.textContent = "Mentve";
-      setTimeout(function () { b.textContent = "Mentés"; }, 2000);
+      setTimeout(function () { b.textContent = "Beállítások mentése"; }, 2000);
     }).catch(function (err) {
       $("cbErr").textContent = C.humanError(err);
-      b.textContent = "Mentés";
+      b.textContent = "Beállítások mentése";
     }).then(function () { b.disabled = false; });
   };
 
@@ -234,9 +289,24 @@
   }
 
   document.addEventListener("click", function (e) {
-    var b = e.target.closest("button[data-del],button[data-delcrew],button[data-clear],button[data-proofok],button[data-proofno]");
+    var b = e.target.closest("button[data-del],button[data-delcrew],button[data-clear],button[data-proofok],button[data-proofno],button[data-bnedit],button[data-bnreset],button[data-bndel]");
     if (!b || !key) return;
     var id;
+    if ((id = b.getAttribute("data-bnedit"))) {
+      var rec = allBanners.filter(function (x) { return x.id === id; })[0];
+      if (rec) openBanner(rec);
+      return;
+    }
+    if ((id = b.getAttribute("data-bnreset"))) {
+      api.adminBannerReset(key, id).then(load).catch(function (err) { banner(C.humanError(err)); });
+      return;
+    }
+    if ((id = b.getAttribute("data-bndel"))) {
+      arm(b, function () {
+        api.adminBannerDelete(key, id).then(load).catch(function (err) { banner(C.humanError(err)); });
+      });
+      return;
+    }
     if ((id = b.getAttribute("data-proofok"))) {
       b.disabled = true;
       api.adminProofDecide(key, id, true).then(load).catch(function (err) { b.disabled = false; banner(C.humanError(err)); });

@@ -90,33 +90,67 @@
         </section>
 
         <section class="panel">
-          <header><h2>Hirdetőhely és támogatás</h2></header>
-          <div class="pad" style="display:flex;flex-direction:column;gap:12px">
-            <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-family:var(--body);font-size:13.5px;color:var(--fg)">
-              <input type="checkbox" id="cbOn" style="width:auto"> Hirdetés megjelenítése a főoldalon
-            </label>
+          <header>
+            <h2>Hirdetések<span class="count" id="bnCount"></span></h2>
+            <button class="btn sm" id="bnNew" type="button">Új hirdetés</button>
+          </header>
+
+          <div class="pad" id="bnForm" hidden style="display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--line)">
             <div>
-              <label for="cbImage">Kép címe (https)</label>
-              <input type="text" id="cbImage" placeholder="https://..../banner.jpg" autocomplete="off">
+              <label for="bnNev">Név (csak neked, a listában)</label>
+              <input type="text" id="bnNev" maxlength="60" placeholder="pl. Gamer székek – november" autocomplete="off">
             </div>
             <div>
-              <label for="cbLink">Hova vigyen kattintásra (https)</label>
-              <input type="text" id="cbLink" placeholder="https://..." autocomplete="off">
+              <label for="bnImage">Kép címe (https)</label>
+              <input type="text" id="bnImage" placeholder="https://..../banner.jpg" autocomplete="off">
             </div>
             <div>
-              <label for="cbAlt">Rövid leírás a képhez</label>
-              <input type="text" id="cbAlt" maxlength="120" placeholder="pl. Gamer székek 20% kedvezménnyel" autocomplete="off">
+              <label for="bnLink">Hova vigyen kattintásra (https)</label>
+              <input type="text" id="bnLink" placeholder="https://..." autocomplete="off">
             </div>
             <div>
-              <label for="cbDonate">Támogatás linkje (https, pl. PayPal)</label>
-              <input type="text" id="cbDonate" placeholder="https://paypal.me/..." autocomplete="off">
+              <label for="bnAlt">Rövid leírás a képhez</label>
+              <input type="text" id="bnAlt" maxlength="120" placeholder="pl. Gamer székek 20% kedvezménnyel" autocomplete="off">
+            </div>
+            <div class="two">
+              <div>
+                <label for="bnSorrend">Sorrend</label>
+                <input type="number" id="bnSorrend" value="0" step="1">
+              </div>
+              <div>
+                <label for="bnAktiv">Állapot</label>
+                <select id="bnAktiv"><option value="1">Aktív</option><option value="0">Szünetel</option></select>
+              </div>
+            </div>
+            <img id="bnPrev" class="shot" alt="Előnézet" hidden>
+            <p class="err" id="bnErr"></p>
+            <div style="display:flex;gap:8px">
+              <button class="btn sm ok" id="bnSave" type="button">Mentés</button>
+              <button class="btn sm ghost" id="bnCancel" type="button">Mégsem</button>
+            </div>
+          </div>
+
+          <ul class="lb adm" id="bnList"></ul>
+          <div class="empty" id="bnEmpty" hidden><b>Nincs hirdetés</b>Az „Új hirdetés" gombbal vehetsz fel egyet. Több hirdetés automatikusan váltakozik.</div>
+
+          <div class="pad" style="border-top:1px solid var(--line);display:flex;flex-direction:column;gap:12px">
+            <div class="two">
+              <div>
+                <label for="bnDelay">Váltás ideje (ms)</label>
+                <input type="number" id="bnDelay" min="1000" max="60000" step="500" value="4000">
+              </div>
+              <div>
+                <label for="bnDonate">Támogatás linkje (https)</label>
+                <input type="text" id="bnDonate" placeholder="https://paypal.me/..." autocomplete="off">
+              </div>
             </div>
             <p class="err" id="cbErr"></p>
-            <button class="btn sm" id="cbSave" type="button">Mentés</button>
-            <p class="hint">A hirdetés a főoldalon, a cím mellett jelenik meg — mobilon alatta, teljes szélességben. A támogatás gomb a láblécben bukkan fel, ha megadsz linket.</p>
-            <div id="cbCodeWrap" hidden>
-              <label style="margin-top:4px">Beillesztő kód máshová</label>
-              <code class="embed" id="cbCode"></code>
+            <button class="btn sm" id="cbSave" type="button">Beállítások mentése</button>
+            <p class="hint">1000 = 1 másodperc. Egyetlen hirdetésnél nincs váltás. A támogatás gomb a láblécben jelenik meg.</p>
+            <div>
+              <label style="margin-top:4px">Beillesztő kód más oldalra</label>
+              <code class="embed" id="bnCode"></code>
+              <p class="hint">Ezt az egy sort kell beilleszteni bárhová: ugyanaz a forgó hirdetés jelenik meg, és a kattintás itt is mérődik. A <code style="background:none;border:0;padding:0;display:inline">data-width</code> értékkel szabod a szélességet.</p>
             </div>
           </div>
         </section>

@@ -35,6 +35,15 @@ async function rpc(name, args) {
   return text ? JSON.parse(text) : null;
 }
 
+/* egyszerű olvasás egy táblából */
+async function select(table, cols) {
+  const r = await fetch(SUPABASE_URL + "/rest/v1/" + table + "?select=" + encodeURIComponent(cols), {
+    headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY }
+  });
+  if (!r.ok) throw new Error("select " + r.status);
+  return r.json();
+}
+
 function origin(req) {
   const host = req.headers["x-forwarded-host"] || req.headers.host;
   const proto = req.headers["x-forwarded-proto"] || "https";
@@ -108,6 +117,6 @@ const UUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a
 
 module.exports = {
   SUPABASE_URL, SUPABASE_KEY, LINK_SECRET,
-  configured, steamConfigured, rpc, origin,
+  configured, steamConfigured, rpc, select, origin,
   verifyOpenId, steamHours, steamPersona, readJson, UUID
 };
