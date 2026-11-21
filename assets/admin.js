@@ -9,9 +9,12 @@
   var KEY = "gta6hu_admin";
   var key = null, setupMode = false, filter = "";
 
-  function getKey() { try { return sessionStorage.getItem(KEY); } catch (e) { return null; } }
+  /* a jelszót a böngésző megjegyzi, hogy ne kelljen minden alkalommal beírni;
+     a Kijelentkezés gomb törli */
+  function getKey() { try { return localStorage.getItem(KEY); } catch (e) { return null; } }
   function setKey(v) {
-    try { v ? sessionStorage.setItem(KEY, v) : sessionStorage.removeItem(KEY); } catch (e) { }
+    try { v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); } catch (e) { }
+    try { sessionStorage.removeItem(KEY); } catch (e) { }
     key = v;
   }
 
@@ -87,9 +90,11 @@
 
   function load() {
     if (!key) { showGate(""); return; }
-    Promise.all([api.adminReports(key), api.adminFans(key), api.adminCrews(key), api.adminProofs(key)])
+    Promise.all([api.adminReports(key), api.adminFans(key), api.adminCrews(key),
+                 api.adminProofs(key), api.adminConfig(key)])
       .then(function (r) {
         allReports = r[0]; allFans = r[1]; allCrews = r[2]; allProofs = r[3];
+        fillConfig(r[4]);
         banner(null);
         render();
       })
@@ -171,6 +176,51 @@
         "</li>";
     }).join("") : '<li><span class="nm" style="font-weight:400;color:var(--muted)">Nincs találat.</span></li>';
   }
+
+  /* --- hirdetőhely és támogatás --- */
+  function fillConfig(c) {
+    c = c || {};
+    $("cbOn").checked = !!c.banner_on;
+    $("cbImage").value = c.banner_image || "";
+    $("cbLink").value = c.banner_link || "";
+    $("cbAlt").value = c.banner_alt || "";
+    $("cbDonate").value = c.donate_url || "";
+    showCode();
+  }
+  function showCode() {
+    var img = $("cbImage").value.trim();
+    var link = $("cbLink").value.trim();
+    var alt = $("cbAlt").value.trim() || "Hirdetés";
+    if (!img) { $("cbCodeWrap").hidden = true; return; }
+    var tag = '<img src="' + img + '" alt="' + alt + '" style="max-width:100%;height:auto">';
+    $("cbCode").textContent = link
+      ? '<a href="' + link + '" target="_blank" rel="noopener nofollow sponsored">' + tag + "</a>"
+      : tag;
+    $("cbCodeWrap").hidden = false;
+  }
+  ["cbImage", "cbLink", "cbAlt"].forEach(function (id) {
+    $(id).addEventListener("input", showCode);
+  });
+  $("cbSave").onclick = function () {
+    if (!key) return;
+    var b = this;
+    $("cbErr").textContent = "";
+    b.disabled = true;
+    b.textContent = "Mentés…";
+    api.adminConfigSet(key, {
+      banner_on: $("cbOn").checked,
+      banner_image: $("cbImage").value.trim(),
+      banner_link: $("cbLink").value.trim(),
+      banner_alt: $("cbAlt").value.trim(),
+      donate_url: $("cbDonate").value.trim()
+    }).then(function () {
+      b.textContent = "Mentve";
+      setTimeout(function () { b.textContent = "Mentés"; }, 2000);
+    }).catch(function (err) {
+      $("cbErr").textContent = C.humanError(err);
+      b.textContent = "Mentés";
+    }).then(function () { b.disabled = false; });
+  };
 
   /* kétlépcsős megerősítés minden törlésnél */
   function arm(btn, run) {

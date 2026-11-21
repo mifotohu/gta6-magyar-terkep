@@ -45,6 +45,17 @@ h2.page{font-family:var(--display);font-size:clamp(24px,5vw,40px);margin:0 0 6px
 .chip.live i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#5ad2a0;margin-right:6px;animation:blip 1.8s infinite}
 @keyframes blip{0%,100%{opacity:1}50%{opacity:.25}}
 
+/* fejléc + hirdetőhely */
+.headrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:start}
+.promo{width:300px;max-width:100%;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(255,255,255,.04)}
+.promo a{display:block;line-height:0}
+.promo img{display:block;width:100%;height:auto}
+.promo .lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);padding:5px 8px;text-align:center;line-height:1.4}
+@media (max-width:900px){
+  .headrow{grid-template-columns:minmax(0,1fr)}
+  .promo{width:100%;max-width:360px;margin-top:4px}
+}
+
 /* statisztika */
 .stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:26px 0 20px}
 .stat{min-width:0;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:linear-gradient(170deg,rgba(255,255,255,.07),rgba(255,255,255,.02))}

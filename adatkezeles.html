@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Adatkezelés — GTA VI Magyar Térkép</title>
+<meta name="description" content="Milyen adatot tárol a GTA VI magyar rajongói térkép, meddig, és hogyan töröltetheted.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .doc{max-width:72ch}
+  .doc h3{font-family:var(--display);font-size:19px;text-transform:uppercase;margin:28px 0 8px;color:var(--fg)}
+  .doc p,.doc li{font-size:14.5px;line-height:1.7;color:var(--muted)}
+  .doc strong{color:var(--fg)}
+  .doc ul{padding-left:20px}
+  .doc li{margin-bottom:6px}
+  .doc table{width:100%;border-collapse:collapse;margin:10px 0 4px;font-size:13.5px}
+  .doc th,.doc td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  .doc th{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .doc td{color:var(--muted)}
+  .doc td:first-child{color:var(--fg);font-weight:600;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow"><b>GTA VI</b> · Magyar rajongói térkép</p>
+  <h2 class="page">Adatkezelés</h2>
+  <p class="lede">Röviden: <strong>regisztráció nincs, személyes adatot nem kérünk, bankkártyaadatot soha</strong>. Csak azt tároljuk, amit te magad írsz be a térképre.</p>
+
+  <div class="panel pad doc" style="margin-top:22px">
+
+    <h3>Mit tárolunk</h3>
+    <table>
+      <tr><th>Adat</th><th>Honnan jön, meddig marad</th></tr>
+      <tr><td>Becenév</td><td>Te adod meg. Bármit választhatsz — nem kell a valódi neved. Nyilvános.</td></tr>
+      <tr><td>Hely</td><td>Te választod ki egy listából: város, Budapesten kerület. <strong>Pontos címet vagy utcát megadni nem lehet</strong>, és a helymeghatározást sem kérjük. Nyilvános.</td></tr>
+      <tr><td>Óraszám, platform, üzenet, crew</td><td>Te adod meg. Nyilvános.</td></tr>
+      <tr><td>Titkos azonosító</td><td>A böngésződ tárolja (localStorage). Ez bizonyítja, hogy a bejegyzés a tiéd, és csak te szerkesztheted. Nem tudunk belőle rád következtetni.</td></tr>
+      <tr><td>IP-lenyomat</td><td>Az IP-címedből képzett, <strong>visszafejthetetlen</strong> ujjlenyomat. Csak arra jó, hogy ne lehessen percenként száz hamis pontot felvinni. Magát az IP-címet nem tároljuk.</td></tr>
+      <tr><td>Jelentés</td><td>Ha jelentesz egy bejegyzést: az ok, a megjegyzésed és egy IP-lenyomat. Nyilvánosan nem látszik, csak a moderátor nézi.</td></tr>
+      <tr><td>Képernyőkép</td><td>Ha óraszámot igazolsz: a kép a böngésződben kicsinyítve kerül fel, csak a moderátor látja, és <strong>az elbírálás pillanatában töröljük</strong>.</td></tr>
+      <tr><td>Steam-azonosító</td><td>Csak ha magad kötöd össze a Steam-fiókod. Külön, nem nyilvános helyen tároljuk; kifelé csak az óraszám és a hitelesítés ténye látszik. A leválasztás gombbal bármikor törlöd.</td></tr>
+    </table>
+
+    <h3>Amit nem csinálunk</h3>
+    <ul>
+      <li>Nincs regisztráció, nincs jelszó, nincs e-mail-cím bekérés.</li>
+      <li><strong>Bankkártya- vagy fizetési adatot soha nem kérünk be</strong>, és nem is tudnánk fogadni. Ha valaha ilyet kérne tőled egy oldal a nevünkben, az csalás.</li>
+      <li>Nincs hirdetési nyomkövető, nincs közösségi pixel, nincs profilalkotás, nincs látogatói analitika.</li>
+      <li>Az adataidat nem adjuk el és nem adjuk tovább senkinek.</li>
+    </ul>
+
+    <h3>Sütik</h3>
+    <p>Az oldal <strong>nem használ sütiket</strong>. Amit tárol, az a böngésződ helyi tárolója (localStorage): a titkos azonosítód, és hogy melyik bejegyzést jelentetted már. Ezek a te gépeden maradnak, nem kerülnek át hozzánk.</p>
+
+    <h3>Ki fér hozzá</h3>
+    <p>A nyilvános adatokat (becenév, hely, óraszám, platform, üzenet, crew) bárki láthatja, aki megnyitja az oldalt — ez a lényege. A nem nyilvános adatokat (jelentések, képek, Steam-azonosító) csak az oldal moderátora látja a jelszóval védett felületen.</p>
+    <p>Az oldalt a <strong>Vercel</strong> szolgálja ki, az adatbázis a <strong>Supabase</strong> frankfurti (EU-s) szerverén fut. Ha összekötöd a Steam-fiókod, a játékidő lekérése a <strong>Valve</strong> Steam Web API-ján keresztül történik.</p>
+
+    <h3>Meddig tároljuk</h3>
+    <p>Amíg te nem törlöd. A bejegyzésed mellett ott a <strong>Törlés</strong> gomb: egy kattintás, és minden hozzá tartozó adat — az óraszám-napló, a Steam-összekötés, a beküldött képek — azonnal és véglegesen eltűnik. Nincs „archívum", nincs visszaállítás.</p>
+
+    <h3>A jogaid</h3>
+    <p>Kérheted az adataid másolatát, javítását vagy törlését. A törlést és a javítást a saját kártyádon egy kattintással magad is elvégezheted, bejelentkezés nélkül. Ha bármi másra van szükséged, vagy elvesztetted a böngésződben tárolt azonosítót, írj az üzemeltetőnek — a kapcsolat az oldal láblécében.</p>
+    <p>Ha úgy érzed, az adataidat nem megfelelően kezeljük, panaszt tehetsz a Nemzeti Adatvédelmi és Információszabadság Hatóságnál (NAIH).</p>
+
+    <h3>Moderáció</h3>
+    <p>A sértő, hamis vagy visszaélésszerű bejegyzéseket törölhetjük. Ha ilyet látsz, a hely listájában a bejegyzés alatti <strong>jelentés</strong> linkkel szólhatsz — névtelenül.</p>
+
+    <h3>Az oldalról</h3>
+    <p><strong>Ez az oldal AI eszközökkel készült, és a rendszer hibázhat.</strong> A számok a látogatók önkéntes bevallásán alapulnak, nem mérésen — a „✓ igazolt" és „✓ Steam" jelvényt kapott óraszámokon kívül semmi nem ellenőrzött. Ne használd komoly döntéshez.</p>
+    <p>Nem hivatalos rajongói oldal: nem áll kapcsolatban a Rockstar Games-szel vagy a Take-Two Interactive-val. Az oldal ingyenesen használható.</p>
+    <p style="font-size:12.5px;opacity:.8">Ez a tájékoztató közérthetőségre törekszik, nem jogi szakvélemény. Ha az oldal üzleti célt is szolgál majd, érdemes jogásszal is átnézetni.</p>
+  </div>
+
+  <footer>
+    <nav>
+      <a href="index.html">Vissza a térképre</a>
+      <a href="stats.html">Statisztikák</a>
+      <a href="embed.html">Beágyazható térkép</a>
+    </nav>
+    <p>A megye- és kerülethatárok: © OpenStreetMap közreműködők, ODbL. A lakosságszámok kerekített becslések.</p>
+  </footer>
+</div>
+</body>
+</html>

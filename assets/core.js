@@ -50,7 +50,8 @@
     NINCS_ILYEN: "Ez a bejegyzés már nincs meg.",
     NINCS_JOGOSULTSAG: "Hibás jelszó.",
     MAR_VAN_ADMIN: "Az admin jelszó már be van állítva.",
-    ROVID_JELSZO: "A jelszó legalább 12 karakter legyen."
+    ROVID_JELSZO: "A jelszó legalább 12 karakter legyen.",
+    CSAK_HTTPS: "A címeknek https://-sel kell kezdődniük."
   };
   function humanError(err) {
     if (!err) return "Ismeretlen hiba.";
@@ -178,6 +179,30 @@
       need();
       return sb.rpc("report_fan", { p_fan_id: fanId, p_reason: reason, p_note: note || null })
         .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+
+    /* --- oldalbeállítások (banner, támogatás) --- */
+    config: function () {
+      need();
+      return sb.from("site_config").select("banner_on,banner_image,banner_link,banner_alt,donate_url").limit(1)
+        .then(function (r) { if (r.error) throw r.error; return (r.data || [])[0] || null; });
+    },
+    adminConfig: function (key) {
+      need();
+      return sb.rpc("admin_config", { p_key: key })
+        .then(function (r) { if (r.error) throw r.error; return (r.data || [])[0] || null; });
+    },
+    adminConfigSet: function (key, c) {
+      need();
+      return sb.rpc("admin_config_set", {
+        p_key: key, p_on: !!c.banner_on, p_image: c.banner_image || null,
+        p_link: c.banner_link || null, p_alt: c.banner_alt || null, p_donate: c.donate_url || null
+      }).then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+
+    /* értesítés a moderátornak; ha nincs beállítva, csendben nem csinál semmit */
+    notify: function () {
+      return fetch("/api/notify", { method: "POST" }).catch(function () { });
     },
 
     /* --- hitelesítés képpel --- */

@@ -16,13 +16,18 @@
 </head>
 <body>
 <div class="wrap">
-  <p class="eyebrow">
-    <b>GTA VI</b> · Magyar rajongói térkép
-    <span class="chip" id="dayChip">—</span>
-    <span class="chip live" id="liveChip" hidden><i></i><span id="liveN">0</span> nézi most</span>
-  </p>
-  <h1>Honnan tolod?</h1>
-  <p class="lede">Jelöld be magad a térképen — <strong>város, Budapesten kerület</strong> pontossággal, utcáig soha —, írd be, hány órát játszottál, és nézd, hol pulzál a legerősebben a magyar Leonida-láz.</p>
+  <div class="headrow">
+    <div>
+      <p class="eyebrow">
+        <b>GTA VI</b> · Magyar rajongói térkép
+        <span class="chip" id="dayChip">—</span>
+        <span class="chip live" id="liveChip" hidden><i></i><span id="liveN">0</span> nézi most</span>
+      </p>
+      <h1>Honnan tolod?</h1>
+      <p class="lede">Jelöld be magad a térképen — <strong>város, Budapesten kerület</strong> pontossággal, utcáig soha —, írd be, hány órát játszottál, és nézd, hol pulzál a legerősebben a magyar Leonida-láz.</p>
+    </div>
+    <aside class="promo" id="promo" hidden></aside>
+  </div>
 
   <div class="banner" id="banner" hidden></div>
 
@@ -101,8 +106,15 @@
   </div>
 
   <footer>
-    <nav><a href="stats.html">Statisztikák</a><a href="embed.html">Beágyazható térkép</a></nav>
-    <b>Nem hivatalos rajongói oldal.</b> Nem áll kapcsolatban a Rockstar Games-szel vagy a Take-Two Interactive-val, és nem is képviseli őket. A térkép adatai a látogatók önkéntes bejelölései; a legrészletesebb megadható szint a város, Budapesten a kerület — cím vagy utca soha. A visszaélések szűréséhez a szerver a bejelölésekhez egy titkosított (visszafejthetetlen) IP-lenyomatot tárol. A megye- és kerülethatárok: © OpenStreetMap közreműködők, ODbL. A lakosságszámok kerekített becslések.
+    <nav>
+      <a href="stats.html">Statisztikák</a>
+      <a href="embed.html">Beágyazható térkép</a>
+      <a href="adatkezeles.html">Adatkezelés</a>
+    </nav>
+    <p><b>Nem hivatalos rajongói oldal.</b> Nem áll kapcsolatban a Rockstar Games-szel vagy a Take-Two Interactive-val, és nem is képviseli őket. A térkép adatai a látogatók önkéntes bejelölései; a legrészletesebb megadható szint a város, Budapesten a kerület — cím vagy utca soha.</p>
+    <p><b>Az oldal AI eszközökkel készült, és a rendszer hibázhat.</b> Ha furcsa adatot vagy hibás működést látsz, ne vedd készpénznek — jelezd, és javítjuk. <b>Semmilyen személyes adatot és bankkártyaadatot nem kérünk be</b>, regisztráció nincs: egy becenév és egy város, ennyi. Az oldal <b>ingyenesen használható</b>, és az is marad — ha tetszik, a támogatást hálásan köszönjük.</p>
+    <p id="donateWrap" hidden><a class="btn sm" id="donateLink" href="#" target="_blank" rel="noopener nofollow" style="display:inline-block;text-decoration:none">Támogatom az oldalt</a></p>
+    <p>A megye- és kerülethatárok: © OpenStreetMap közreműködők, ODbL. A lakosságszámok kerekített becslések. Részletek: <a href="adatkezeles.html">adatkezelés</a>.</p>
   </footer>
 </div>
 

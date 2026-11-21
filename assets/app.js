@@ -175,12 +175,12 @@
         return;
       }
       html = cg.slice(0, 12).map(function (g, i) {
-        return "<li><span class=\"rk\">" + (i + 1) + "</span>" +
+        return '<li data-crew="' + esc(g.crew.id) + '"><span class="rk">' + (i + 1) + "</span>" +
           '<span class="nm"><span class="crewdot" style="background:' + esc(g.crew.color) + '"></span>' +
           esc(g.crew.name) + "<em>" + g.fans.length + " tag</em></span>" +
           '<span class="vl">' + nf(g.hours) + " ó</span></li>";
       }).join("");
-      note.innerHTML = '<p class="note">A crew-k összesített óraszám szerint állnak sorban.</p>';
+      note.innerHTML = '<p class="note">Kattints egy crew-ra, és megnézheted, kik a tagjai. A sorrendet az összesített óraszám adja.</p>';
     }
     list.innerHTML = html;
   }
@@ -193,8 +193,36 @@
     };
   });
   $("lbList").addEventListener("click", function (e) {
-    var li = e.target.closest("li[data-place]");
+    var li = e.target.closest("li[data-crew]");
+    if (li) { openCrew(li.getAttribute("data-crew")); return; }
+    li = e.target.closest("li[data-place]");
     if (li) openPlace(li.getAttribute("data-place"));
+  });
+
+  /* egy crew tagjai */
+  function openCrew(id) {
+    var cw = crews[id];
+    if (!cw) return;
+    sel = null;
+    map.select(null);
+    var list = fans.filter(function (f) { return f.crew_id === id; })
+      .sort(function (a, b) { return b.hours - a.hours; });
+    var ossz = list.reduce(function (s, f) { return s + f.hours; }, 0);
+    $("cityName").innerHTML = '<span class="crewdot" style="background:' + esc(cw.color) + '"></span>' +
+      esc(cw.name) + " · " + list.length + " tag · " + nf(ossz) + " óra";
+    $("cityList").innerHTML = list.map(function (f, i) {
+      var pl = D.BY_ID[f.place_id];
+      return '<li data-place="' + esc(f.place_id) + '"><span class="rk">' + (i + 1) + "</span>" +
+        '<span class="nm">' + (online[f.id] ? '<span class="crewdot" style="background:#5ad2a0"></span>' : "") +
+        esc(f.nick) + " " + rankTag(f.hours) + steamTag(f) +
+        "<em>" + (pl ? esc(pl.short) : "") + " · " + esc(C.platLabel(f.platform)) + "</em></span>" +
+        '<span class="vl">' + nf(f.hours) + " ó</span></li>";
+    }).join("");
+    $("cityPanel").hidden = false;
+  }
+  $("cityList").addEventListener("click", function (e) {
+    var li = e.target.closest("li[data-place]");
+    if (li && !e.target.closest("button")) openPlace(li.getAttribute("data-place"));
   });
 
   function openPlace(id, keep) {
@@ -241,6 +269,7 @@
         rememberReported(repTarget);
         $("repNote").value = "";
         $("repDlg").close();
+        api.notify();
         if (sel) openPlace(sel, true);
       })
       .catch(function (err) { $("repErr").textContent = C.humanError(err); });
@@ -383,6 +412,7 @@
     api.proofSubmit(h, me ? me.platform : "Egyeb", proofImage, $("pNote").value)
       .then(function () {
         $("proofDlg").close();
+        api.notify();
         return loadProof();
       })
       .then(function () { renderMine(); })
@@ -695,6 +725,29 @@
     banner(STEAM_MSG[m[1]] || "Ismeretlen válasz a Steamtől.");
     try { history.replaceState(null, "", location.pathname); } catch (e) { }
   })();
+
+  /* hirdetőhely és támogatás-link az adminban beállított értékekből */
+  function renderConfig(cfg) {
+    var p = $("promo");
+    if (cfg && cfg.banner_on && cfg.banner_image) {
+      var img = '<img src="' + esc(cfg.banner_image) + '" alt="' + esc(cfg.banner_alt || "Hirdetés") + '" loading="lazy">';
+      p.innerHTML = '<div class="lab">Hirdetés</div>' +
+        (cfg.banner_link
+          ? '<a href="' + esc(cfg.banner_link) + '" target="_blank" rel="noopener nofollow sponsored">' + img + "</a>"
+          : img);
+      p.hidden = false;
+    } else {
+      p.hidden = true;
+      p.innerHTML = "";
+    }
+    if (cfg && cfg.donate_url) {
+      $("donateLink").href = cfg.donate_url;
+      $("donateWrap").hidden = false;
+    } else {
+      $("donateWrap").hidden = true;
+    }
+  }
+  if (api.ready) api.config().then(renderConfig).catch(function () { });
 
   api.steamEnabled().then(function (on) {
     if (!on) return;
