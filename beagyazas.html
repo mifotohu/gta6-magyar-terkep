@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tedd ki az élő térképet — GTA VI Magyar Térkép</title>
+<meta name="description" content="Ágyazd be a magyar GTA VI élő térképet a saját oldaladba vagy Discordodba — egyetlen kódrészlettel, ingyen.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .lead2{max-width:64ch}
+  .step{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;margin-bottom:8px}
+  .step .n{font-family:var(--display);font-size:20px;color:var(--pink);line-height:1.3}
+  .step h3{font-family:var(--body);font-weight:700;font-size:15px;margin:0 0 4px;color:var(--fg)}
+  .step p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.55}
+  .codebox{position:relative}
+  .codebox code{display:block;font-family:var(--mono);font-size:12px;background:rgba(0,0,0,.5);border:1px solid var(--line);border-radius:10px;padding:14px 14px;color:#ffd9a0;word-break:break-all;line-height:1.6;white-space:pre-wrap}
+  .copy{margin-top:10px}
+  .copy.ok{border-color:var(--cyan);color:var(--cyan)}
+  .sizes{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 2px}
+  .prevwrap{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(0,0,0,.25)}
+  .prevwrap iframe{display:block;width:100%;border:0}
+  .prevhead{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:9px 14px;border-bottom:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow"><b>GTA VI</b> · Magyar rajongói térkép</p>
+  <h2 class="page">Tedd ki az élő térképet</h2>
+  <p class="lede lead2">Beágyazhatod a magyar rajongói térképet a saját oldaladba, blogodba vagy — képként — a Discordodba. Ingyen, és mindig az aktuális állást mutatja. Cserébe csak annyit kérünk, hogy a térképen maradjon a „Jelöld be magad" gomb.</p>
+
+  <div class="grid">
+    <section class="panel">
+      <header><h2>Élő előnézet</h2><a class="btn sm" href="embed.html" target="_blank" rel="noopener">Megnyitás külön</a></header>
+      <div class="pad">
+        <div class="prevwrap">
+          <div class="prevhead">Így fog kinézni nálad</div>
+          <iframe id="prev" src="embed.html" height="420" title="A beágyazható térkép előnézete" loading="lazy"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <div class="side">
+      <section class="panel pad">
+        <h2 style="font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:0 0 14px">Beágyazás 2 lépésben</h2>
+
+        <div class="step">
+          <div class="n">1</div>
+          <div>
+            <h3>Válassz szélességet</h3>
+            <p>A magasságot ne piszkáld, a térkép magától arányos marad.</p>
+            <div class="sizes" id="sizes"></div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="n">2</div>
+          <div>
+            <h3>Másold be ezt a kódot</h3>
+            <p>Illeszd be az oldalad HTML-jébe, ahová a térképet szeretnéd.</p>
+          </div>
+        </div>
+
+        <div class="codebox" style="margin-top:6px">
+          <code id="code"></code>
+          <button class="btn sm copy" id="copy" type="button">Kód másolása</button>
+        </div>
+
+        <p class="hint" style="margin-top:14px"><b style="color:var(--fg)">Discordra, ahol nincs beágyazás?</b> Oszd meg simán a linket — a chat automatikusan kirak egy előnézeti képet a térképről.</p>
+        <button class="btn sm" id="copyLink" type="button" style="margin-top:8px">Oldal linkjének másolása</button>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    <nav>
+      <a href="index.html">Vissza a térképre</a>
+      <a href="tippek.html">Tippek</a>
+      <a href="stats.html">Statisztikák</a>
+      <a href="adatkezeles.html">Adatkezelés</a>
+    </nav>
+    <p><b>Nem hivatalos rajongói oldal.</b> Nem áll kapcsolatban a Rockstar Games-szel vagy a Take-Two Interactive-val. Az oldal AI eszközökkel készült, és a rendszer hibázhat. Személyes és bankkártyaadatot nem kérünk be; az oldal ingyenesen használható.</p>
+  </footer>
+</div>
+
+<script src="assets/config.js"></script>
+<script src="assets/core.js"></script>
+<script>
+(function () {
+  var origin = location.origin;
+  var szel = 400;
+  var embedUrl = origin + "/embed.html";
+  var siteUrl = origin + "/";
+
+  function kod() {
+    return '<iframe src="' + embedUrl + '" width="' + szel + '" height="520" ' +
+      'style="border:0;border-radius:16px;max-width:100%" ' +
+      'title="GTA VI magyar rajongói térkép" loading="lazy"></iframe>';
+  }
+  function frissit() {
+    document.getElementById("code").textContent = kod();
+  }
+
+  var MERETEK = [[300, "Keskeny (300)"], [400, "Normál (400)"], [600, "Széles (600)"], [0, "Teljes szélesség"]];
+  document.getElementById("sizes").innerHTML = MERETEK.map(function (m) {
+    return '<button class="btn sm' + (m[0] === szel ? " on" : "") + '" data-w="' + m[0] + '" type="button">' + m[1] + "</button>";
+  }).join("");
+  document.getElementById("sizes").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-w]");
+    if (!b) return;
+    var w = +b.getAttribute("data-w");
+    szel = w === 0 ? "100%" : w;
+    document.querySelectorAll("#sizes button").forEach(function (x) { x.classList.toggle("on", x === b); });
+    frissit();
+  });
+
+  function masol(text, btn, alap) {
+    function kesz(ok) {
+      btn.textContent = ok ? "Másolva!" : "Jelöld ki és másold";
+      btn.classList.toggle("ok", ok);
+      setTimeout(function () { btn.textContent = alap; btn.classList.remove("ok"); }, 2500);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { kesz(true); }, function () { kesz(false); });
+    } else { kesz(false); }
+  }
+  document.getElementById("copy").onclick = function () { masol(kod(), this, "Kód másolása"); };
+  document.getElementById("copyLink").onclick = function () { masol(siteUrl, this, "Oldal linkjének másolása"); };
+
+  frissit();
+})();
+</script>
+</body>
+</html>
