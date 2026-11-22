@@ -28,17 +28,28 @@
     frissit();
   });
 
-  function masol(text, btn, alap) {
+  /* ha a vágólap nem elérhető, kijelöljük a szöveget, hogy Ctrl+C elég legyen */
+  function jelol(el) {
+    try {
+      var r = document.createRange();
+      r.selectNodeContents(el);
+      var s = window.getSelection();
+      s.removeAllRanges();
+      s.addRange(r);
+    } catch (e) { }
+  }
+  function masol(text, btn, alap, selEl) {
     function kesz(ok) {
-      btn.textContent = ok ? "Másolva!" : "Jelöld ki és másold";
+      if (!ok && selEl) jelol(selEl);
+      btn.textContent = ok ? "Másolva!" : "Kijelöltük — Ctrl+C";
       btn.classList.toggle("ok", ok);
-      setTimeout(function () { btn.textContent = alap; btn.classList.remove("ok"); }, 2500);
+      setTimeout(function () { btn.textContent = alap; btn.classList.remove("ok"); }, 2800);
     }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function () { kesz(true); }, function () { kesz(false); });
     } else { kesz(false); }
   }
-  $("copy").onclick = function () { masol(kod(), this, "Kód másolása"); };
+  $("copy").onclick = function () { masol(kod(), this, "Kód másolása", $("code")); };
   $("copyLink").onclick = function () { masol(siteUrl, this, "Oldal linkjének másolása"); };
 
   frissit();
