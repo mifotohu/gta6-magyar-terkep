@@ -12,9 +12,10 @@
 <style>
   .tipcard{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:linear-gradient(170deg,rgba(255,255,255,.055),rgba(255,255,255,.02));display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
   .tipcard .vote{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:52px}
-  .tipcard .vbtn{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--fg);border-radius:10px;width:44px;height:38px;cursor:pointer;font-size:15px;line-height:1;transition:.15s}
-  .tipcard .vbtn:hover{border-color:var(--pink);color:var(--pink)}
-  .tipcard .vbtn.done{border-color:var(--cyan);color:var(--cyan);cursor:default}
+  .tipcard .vbtn{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--muted);border-radius:10px;width:46px;height:40px;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center}
+  .tipcard .vbtn:hover{border-color:var(--pink);color:var(--pink);background:rgba(255,45,149,.1)}
+  .tipcard .vbtn.done{border-color:var(--cyan);color:var(--cyan);background:rgba(45,226,230,.12);cursor:default}
+  .tipcard .vbtn svg{display:block}
   .tipcard .vnum{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
   .tipcard .txt{font-size:14.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
   .tipcard .meta{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:8px}

@@ -251,19 +251,28 @@
   }
 
   /* --- beküldött tippek --- */
+  var ALLAPOT = { varakozik: "vár", elfogadva: "kirakva", elutasitva: "elutasítva" };
   function renderTips() {
-    $("tipCount").textContent = allTips.length ? "(" + allTips.length + ")" : "";
+    var varak = allTips.filter(function (t) { return t.status === "varakozik"; });
+    $("tipCount").textContent = varak.length ? "(" + varak.length + ")" : "";
     $("tipEmpty").hidden = allTips.length > 0;
     $("tipList").innerHTML = allTips.map(function (t) {
+      var acts;
+      if (t.status === "varakozik") {
+        acts = '<button class="btn sm ok" data-tipok="' + esc(t.id) + '" type="button">Kirakom</button>' +
+               '<button class="btn sm danger" data-tipno="' + esc(t.id) + '" type="button">Elutasítom</button>';
+      } else {
+        acts = '<button class="btn sm danger" data-tipdel="' + esc(t.id) + '" type="button">Törlés</button>';
+      }
+      var allapot = ALLAPOT[t.status] || t.status;
       return "<li>" +
         '<span class="nm" style="white-space:normal">' + esc(t.nick) +
-        "<em>" + esc(C.katLabel(t.kategoria)) + " · " + esc(when(t.created_at)) + "</em>" +
+        "<em>" + esc(C.katLabel(t.kategoria)) + " · " + allapot +
+        (t.status === "elfogadva" ? " · " + nf(t.szavazat) + " szavazat" : "") +
+        " · " + esc(when(t.created_at)) + "</em>" +
         '<div class="said" style="white-space:pre-wrap">' + esc(t.szoveg) + "</div>" +
         "</span>" +
-        '<span class="acts">' +
-        '<button class="btn sm ok" data-tipok="' + esc(t.id) + '" type="button">Kirakom</button>' +
-        '<button class="btn sm danger" data-tipno="' + esc(t.id) + '" type="button">Elutasítom</button>' +
-        "</span></li>";
+        '<span class="acts">' + acts + "</span></li>";
     }).join("");
   }
 
@@ -415,6 +424,12 @@
     if ((id = b.getAttribute("data-tipno"))) {
       b.disabled = true;
       api.adminTipDecide(key, id, false).then(load).catch(function (err) { b.disabled = false; banner(C.humanError(err)); });
+      return;
+    }
+    if ((id = b.getAttribute("data-tipdel"))) {
+      arm(b, function () {
+        api.adminTipDelete(key, id).then(load).catch(function (err) { banner(C.humanError(err)); });
+      });
       return;
     }
     if ((id = b.getAttribute("data-chdel"))) {

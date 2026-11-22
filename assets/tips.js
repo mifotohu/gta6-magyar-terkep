@@ -43,6 +43,8 @@
     catch (e) { return ""; }
   }
 
+  var THUMB = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
+    '<path fill="currentColor" d="M2 9.6h3.2V21H2zM22 11c0-1.1-.9-2-2-2h-5.4l.8-3.9v-.2c0-.4-.2-.8-.5-1.1l-.9-.9-5.3 5.3c-.4.4-.6.9-.6 1.4v8c0 1.1.9 2 2 2h7.3c.8 0 1.5-.5 1.8-1.2l2.4-5.7c.1-.2.1-.4.1-.6z"/></svg>';
   function render() {
     $("empty").hidden = tips.length > 0;
     $("list").innerHTML = tips.map(function (t) {
@@ -50,7 +52,8 @@
       return '<article class="tipcard">' +
         '<div class="vote">' +
         '<button class="vbtn' + (volt ? " done" : "") + '" data-vote="' + esc(t.id) + '" type="button" ' +
-        'title="' + (volt ? "Már szavaztál erre" : "Ez bevált nekem") + '">▲</button>' +
+        'aria-label="' + (volt ? "Már szavaztál erre" : "Hasznos tipp") + '" ' +
+        'title="' + (volt ? "Már szavaztál erre" : "Ez bevált nekem") + '">' + THUMB + "</button>" +
         '<span class="vnum" id="v-' + esc(t.id) + '">' + nf(t.szavazat) + "</span>" +
         "</div>" +
         '<div><div class="txt">' + esc(t.szoveg) + "</div>" +
@@ -110,6 +113,7 @@
       $("tCount").textContent = "0";
       $("tErr").textContent = "";
       $("tMine").innerHTML = '<p class="note" style="color:#8af0c0">Köszönjük! A tipped átnézésre vár, utána megjelenik a listában.</p>';
+      api.notify();
       return sajatok();
     }).catch(function (err) {
       $("tErr").textContent = C.humanError(err);

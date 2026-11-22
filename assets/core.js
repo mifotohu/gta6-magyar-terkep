@@ -235,6 +235,11 @@
       return sb.rpc("admin_tip_decide", { p_key: key, p_id: id, p_ok: ok })
         .then(function (r) { if (r.error) throw r.error; return r.data; });
     },
+    adminTipDelete: function (key, id) {
+      need();
+      return sb.rpc("admin_tip_delete", { p_key: key, p_id: id })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
 
     /* --- heti kihívás --- */
     challenge: function () {
@@ -410,4 +415,28 @@
     esc: esc, nf: nf, platLabel: platLabel, days: days, humanError: humanError,
     MODES: MODES, modeLabel: modeLabel, KATEGORIAK: KATEGORIAK, katLabel: katLabel
   };
+
+  /* Diszkrét moderációs gyorslink: csak azon a gépen jelenik meg, ahol
+     korábban bejelentkeztél az adminba (a jelszó a localStorage-ban van).
+     Így oda-vissza tudsz lépkedni, de kívülálló nem látja. */
+  (function () {
+    var van = false;
+    try { van = !!localStorage.getItem("gta6hu_admin"); } catch (e) { }
+    if (!van) return;
+    var itt = /\/admin\.html$/.test(location.pathname);
+    function mount() {
+      if (document.getElementById("gta6hu-adminlink")) return;
+      var a = document.createElement("a");
+      a.id = "gta6hu-adminlink";
+      a.href = itt ? "index.html" : "admin.html";
+      a.textContent = itt ? "↩ Vissza a térképre" : "⚙ Moderáció";
+      a.style.cssText = "position:fixed;right:12px;bottom:12px;z-index:60;" +
+        "font:600 12px/1 system-ui,sans-serif;text-decoration:none;color:#f8ecff;" +
+        "background:rgba(26,10,56,.92);border:1px solid rgba(255,45,149,.5);" +
+        "border-radius:999px;padding:9px 14px;box-shadow:0 8px 22px -10px #000;backdrop-filter:blur(4px)";
+      document.body.appendChild(a);
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
+    else mount();
+  })();
 })(window);
