@@ -177,12 +177,13 @@
   }
 
   function render() {
+    var varakozoTipp = allTips.filter(function (t) { return t.status === "varakozik"; }).length;
     var reszek = [];
     if (allProofs.length) reszek.push(allProofs.length + " kép");
-    if (allTips.length) reszek.push(allTips.length + " tipp");
+    if (varakozoTipp) reszek.push(varakozoTipp + " tipp");
     if (allReports.length) reszek.push(allReports.length + " jelentés");
     $("sum").textContent = reszek.length ? reszek.join(" · ") + " vár rád" : "nincs nyitott teendő";
-    var teendo = allProofs.length + allTips.length + allReports.length;
+    var teendo = allProofs.length + varakozoTipp + allReports.length;
     $("secCount").textContent = teendo ? "(" + teendo + ")" : "";
 
     /* hitelesítésre váró képek */
@@ -413,7 +414,7 @@
   }
 
   document.addEventListener("click", function (e) {
-    var b = e.target.closest("button[data-del],button[data-delcrew],button[data-clear],button[data-proofok],button[data-proofno],button[data-bnedit],button[data-bnreset],button[data-bndel],button[data-tipok],button[data-tipno],button[data-chdel]");
+    var b = e.target.closest("button[data-del],button[data-delcrew],button[data-clear],button[data-proofok],button[data-proofno],button[data-bnedit],button[data-bnreset],button[data-bndel],button[data-tipok],button[data-tipno],button[data-tipdel],button[data-chdel]");
     if (!b || !key) return;
     var id;
     if ((id = b.getAttribute("data-tipok"))) {
