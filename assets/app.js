@@ -753,6 +753,16 @@
     }).catch(function () { b.disabled = false; });
   };
   /* --- tippek a főoldalon --- */
+  var THUMB_SVG = '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">' +
+    '<path fill="currentColor" d="M2 9.6h3.2V21H2zM22 11c0-1.1-.9-2-2-2h-5.4l.8-3.9v-.2c0-.4-.2-.8-.5-1.1l-.9-.9-5.3 5.3c-.4.4-.6.9-.6 1.4v8c0 1.1.9 2 2 2h7.3c.8 0 1.5-.5 1.8-1.2l2.4-5.7c.1-.2.1-.4.1-.6z"/></svg>';
+  var tipVoted = (function () {
+    try { return JSON.parse(localStorage.getItem("gta6hu_votes") || "{}"); } catch (e) { return {}; }
+  })();
+  function tipRememberVote(id) {
+    tipVoted[id] = 1;
+    try { localStorage.setItem("gta6hu_votes", JSON.stringify(tipVoted)); } catch (e) { }
+  }
+
   function loadTips() {
     if (!api.ready) return;
     api.tips("").then(function (rows) {
@@ -762,16 +772,42 @@
           'Te lehetsz az első, aki megoszt valamit a magyar közösséggel.</div>';
         return;
       }
-      box.innerHTML = rows.slice(0, 3).map(function (t) {
+      var mutat = rows.slice(0, 2);
+      var tobb = rows.length - mutat.length;
+      box.innerHTML = mutat.map(function (t) {
         var sz = t.szoveg.length > 190 ? t.szoveg.slice(0, 190) + "…" : t.szoveg;
+        var volt = !!tipVoted[t.id];
         return '<div class="tiprow">' +
-          '<div class="cnt">' + nf(t.szavazat) + "<em>szav.</em></div>" +
-          '<div><div class="txt">' + esc(sz) + "</div>" +
+          '<div class="txt">' + esc(sz) +
           '<div class="who"><b>' + esc(C.katLabel(t.kategoria)) + "</b> · " + esc(t.nick) + "</div></div>" +
+          '<button class="tipvote' + (volt ? " done" : "") + '" data-tipvote="' + esc(t.id) + '" type="button" ' +
+          'aria-label="' + (volt ? "Már szavaztál" : "Hasznos tipp") + '" title="' + (volt ? "Már szavaztál erre" : "Ez bevált nekem") + '">' +
+          THUMB_SVG + '<span id="hv-' + esc(t.id) + '">' + nf(t.szavazat) + "</span></button>" +
           "</div>";
-      }).join("");
+      }).join("") +
+      (tobb > 0
+        ? '<a class="tipmore" href="tippek.html">+' + tobb + " további tipp →</a>"
+        : '<a class="tipmore" href="tippek.html">Összes tipp →</a>');
     }).catch(function () { });
   }
+
+  /* szavazás a főoldali tippdobozból */
+  $("tipsBox").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-tipvote]");
+    if (!b) return;
+    var id = b.getAttribute("data-tipvote");
+    if (tipVoted[id]) return;
+    b.disabled = true;
+    api.tipVote(id).then(function (uj) {
+      tipRememberVote(id);
+      b.classList.add("done");
+      b.title = "Már szavaztál erre";
+      if (uj) {
+        var el = document.getElementById("hv-" + id);
+        if (el) el.textContent = nf((Number(el.textContent.replace(/\s/g, "")) || 0) + 1);
+      }
+    }).catch(function () { }).then(function () { b.disabled = false; });
+  });
 
   function loadChallenge() {
     if (!api.ready) return;

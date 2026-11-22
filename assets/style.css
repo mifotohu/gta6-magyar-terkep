@@ -109,13 +109,17 @@ svg.map.drag{cursor:grabbing}
 .chcim{font-family:var(--display);font-size:17px;line-height:1.25;color:var(--fg)}
 /* térkép-oszlop: alatta a tippek */
 .mapcol{min-width:0;display:flex;flex-direction:column;gap:18px}
-.tiprow{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
-.tiprow:last-child{border-bottom:0}
-.tiprow .cnt{font-family:var(--mono);font-size:12px;color:var(--orange);min-width:34px;text-align:center}
-.tiprow .cnt em{display:block;font-style:normal;font-size:9px;color:var(--muted);letter-spacing:.1em}
-.tiprow .txt{font-size:13.5px;line-height:1.55;color:var(--fg)}
+.tiprow{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.tiprow:last-of-type{border-bottom:0}
+.tiprow .txt{font-size:13.5px;line-height:1.55;color:var(--fg);min-width:0}
 .tiprow .who{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:5px}
 .tiprow .who b{color:var(--orange);font-weight:700}
+.tipvote{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:3px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:7px 10px;cursor:pointer;transition:.15s;font-family:var(--mono);font-size:12px;line-height:1}
+.tipvote:hover{border-color:var(--pink);color:var(--pink);background:rgba(255,45,149,.1)}
+.tipvote.done{border-color:var(--cyan);color:var(--cyan);background:rgba(45,226,230,.12);cursor:default}
+.tipvote svg{display:block}
+.tipmore{display:block;padding:11px 16px;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);text-decoration:none;border-top:1px solid var(--line)}
+.tipmore:hover{color:var(--pink)}
 .btn.pulse{border-color:rgba(255,45,149,.55);color:var(--fg);animation:pulsebtn 2.6s ease-in-out infinite}
 .btn.pulse:hover{animation:none;border-color:var(--pink)}
 @keyframes pulsebtn{0%,100%{box-shadow:0 0 0 0 rgba(255,45,149,.45)}50%{box-shadow:0 0 0 9px rgba(255,45,149,0)}}
