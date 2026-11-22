@@ -6,7 +6,7 @@
   var esc = C.esc, nf = C.nf;
 
   var fansAll = [], fans = [], crews = {}, weekly = {}, online = {}, me = null;
-  var tab = "place", sel = null, map = null, channel = null, modeSzuro = "";
+  var tab = "place", sel = null, map = null, channel = null;
   var steamOn = false; /* csak akkor kínáljuk a Steam-hitelesítést, ha a szerveren be van kapcsolva */
 
   /* kinek küldtünk már jelentést ebből a böngészőből */
@@ -150,8 +150,7 @@
             '<span class="nm">' + (online[f.id] ? '<span class="crewdot" style="background:#5ad2a0"></span>' : "") +
             (cw ? '<span class="crewdot" style="background:' + esc(cw.color) + '"></span>' : "") +
             esc(f.nick) + " " + rankTag(f.hours) + steamTag(f) +
-            "<em>" + (pl ? esc(pl.short) : "") + " · " + esc(C.platLabel(f.platform)) +
-            (f.mode ? " · " + esc(C.modeLabel(f.mode)) : "") + "</em></span>" +
+            "<em>" + (pl ? esc(pl.short) : "") + " · " + esc(C.platLabel(f.platform)) + "</em></span>" +
             '<span class="vl">' + nf(f.hours) + " ó" + (weekly[f.id] ? "<em>+" + nf(weekly[f.id]) + "</em>" : "") + "</span></li>";
         }).join("");
       note.innerHTML = '<p class="note">A rang az összes játszott órából jön: Újonc → Leonida Veterán.</p>';
@@ -508,7 +507,6 @@
       $("fNick").value = me.nick;
       $("fHours").value = me.hours;
       $("fPlat").value = me.platform;
-      $("fMode").value = me.mode || "";
       $("fNote").value = me.note || "";
       var pl = D.BY_ID[me.place_id];
       $("fPlace").value = pl ? pl.label : "";
@@ -543,7 +541,7 @@
     api.save({
       nick: nick, place_id: pl.id, hours: h,
       platform: $("fPlat").value, note: $("fNote").value.trim(),
-      crew_id: $("fCrew").value || null, mode: $("fMode").value || null
+      crew_id: $("fCrew").value || null
     }).then(function () {
       dlg.close();
       return reload();
@@ -696,17 +694,10 @@
     b.textContent = msg;
   }
 
-  /* --- szűrés játékmódra --- */
   function szuresAlkalmaz() {
-    fans = modeSzuro ? fansAll.filter(function (f) { return f.mode === modeSzuro; }) : fansAll.slice();
+    fans = fansAll.slice();
     render();
   }
-  $("modeFilter").addEventListener("change", function () {
-    modeSzuro = this.value;
-    sel = null;
-    $("cityPanel").hidden = true;
-    szuresAlkalmaz();
-  });
 
   /* --- élő hírfolyam --- */
   function renderTicker() {

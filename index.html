@@ -53,12 +53,6 @@
       <header>
         <h2>Magyarország · élő térkép</h2>
         <div class="tabs">
-          <select id="modeFilter" aria-label="Szűrés játékmódra" style="width:auto;padding:6px 8px;font-size:12px">
-            <option value="">Minden mód</option>
-            <option value="story">Story</option>
-            <option value="online">Online</option>
-            <option value="szabad">Szabad barangolás</option>
-          </select>
           <button class="btn sm on" id="vHu" type="button">Ország</button>
           <button class="btn sm" id="vBp" type="button">Budapest</button>
           <button class="btn sm" id="vHeat" type="button">Hőtérkép</button>
@@ -190,22 +184,11 @@
           </select>
         </div>
       </div>
-      <div class="two">
-        <div>
-          <label for="fCrew">Crew</label>
-          <select id="fCrew"><option value="">— nincs —</option></select>
-        </div>
-        <div>
-          <label for="fMode">Melyik módban tolod?</label>
-          <select id="fMode">
-            <option value="">— nem mondom meg —</option>
-            <option value="story">Story</option>
-            <option value="online">Online</option>
-            <option value="szabad">Szabad barangolás</option>
-          </select>
-        </div>
+      <div>
+        <label for="fCrew">Crew</label>
+        <select id="fCrew"><option value="">— nincs —</option></select>
+        <p class="hint">Nincs még crew-d? Mentés után a saját kártyádon tudsz alapítani egyet.</p>
       </div>
-      <p class="hint" style="margin-top:-6px">Nincs még crew-d? Mentés után a saját kártyádon tudsz alapítani egyet.</p>
       <div>
         <label for="fNote">Rövid üzenet (opcionális)</label>
         <textarea id="fNote" maxlength="90" placeholder="pl. Leonida hív, a munka várhat."></textarea>
