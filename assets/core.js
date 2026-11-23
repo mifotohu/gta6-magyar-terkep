@@ -53,6 +53,8 @@
     ROVID_JELSZO: "A jelszó legalább 12 karakter legyen.",
     CSAK_HTTPS: "A címeknek https://-sel kell kezdődniük.",
     TUL_SOK_TIPP: "Erről a hálózatról ma már három tipp érkezett. Holnap jöhet a következő.",
+    TUL_SOK_VISSZAJELZES: "Erről a hálózatról ma már sok visszajelzés jött. Holnap újra megy.",
+    ROVID_UZENET: "Írj legalább pár szót, hogy értelmezni tudjuk.",
     ROVID_TIPP: "A tipp legalább 10 karakter legyen — írd le pár szóval, miről van szó.",
     ROVID_CIM: "A cím legalább 3 karakter legyen.",
     KELL_NEV: "Adj nevet a hirdetésnek."
@@ -266,6 +268,23 @@
     adminChallengeDelete: function (key, id) {
       need();
       return sb.rpc("admin_challenge_delete", { p_key: key, p_id: id })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+
+    /* --- visszajelzés (ötlet / hiba) --- */
+    feedbackSubmit: function (tipus, szoveg, nick) {
+      need();
+      return sb.rpc("feedback_submit", { p_token: token(), p_tipus: tipus, p_szoveg: szoveg, p_nick: nick || null })
+        .then(function (r) { if (r.error) throw r.error; return r.data; });
+    },
+    adminFeedback: function (key) {
+      need();
+      return sb.rpc("admin_feedback", { p_key: key })
+        .then(function (r) { if (r.error) throw r.error; return r.data || []; });
+    },
+    adminFeedbackDelete: function (key, id) {
+      need();
+      return sb.rpc("admin_feedback_delete", { p_key: key, p_id: id })
         .then(function (r) { if (r.error) throw r.error; return r.data; });
     },
 

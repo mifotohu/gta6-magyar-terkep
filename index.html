@@ -137,6 +137,25 @@
         <code class="embed" id="embedCode">&lt;iframe&gt;…&lt;/iframe&gt;</code>
         <button class="btn sm" id="copyEmbed" type="button" style="margin-top:10px">Kód másolása</button>
       </section>
+
+      <section class="panel pad">
+        <h2 style="font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:0 0 10px">Van ötleted? Hibát találtál?</h2>
+        <div id="fbBox">
+          <div class="two" style="margin-bottom:10px">
+            <div>
+              <label for="fbType">Miről van szó?</label>
+              <select id="fbType">
+                <option value="otlet">Ötlet / javaslat</option>
+                <option value="hiba">Hibajelentés</option>
+              </select>
+            </div>
+          </div>
+          <textarea id="fbText" maxlength="1000" style="min-height:80px" placeholder="Írd le röviden. Hibánál: mit csináltál, és mi történt."></textarea>
+          <p class="err" id="fbErr" style="min-height:0"></p>
+          <button class="btn sm" id="fbSend" type="button" style="margin-top:8px">Beküldöm</button>
+          <p class="hint" style="margin-top:8px">Névtelen, és csak a moderátorhoz jut el — a térképen nem jelenik meg. Köszönjük, hogy segítesz jobbá tenni az oldalt.</p>
+        </div>
+      </section>
     </div>
   </div>
 

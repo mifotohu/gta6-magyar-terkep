@@ -29,7 +29,8 @@ module.exports = async function (req, res) {
   const jelentes = Number(s.jelentes || 0);
   const kep = Number(s.kep || 0);
   const tipp = Number(s.tipp || 0);
-  if (!s.kuldheto || (jelentes + kep + tipp) === 0) {
+  const visszajelzes = Number(s.visszajelzes || 0);
+  if (!s.kuldheto || (jelentes + kep + tipp + visszajelzes) === 0) {
     res.status(200).json({ ok: true, skipped: "nincs_teendo_vagy_korai" });
     return;
   }
@@ -38,6 +39,7 @@ module.exports = async function (req, res) {
   const sorok = [];
   if (kep) sorok.push("Hitelesítésre váró képek: " + kep);
   if (tipp) sorok.push("Jóváhagyásra váró tippek: " + tipp);
+  if (visszajelzes) sorok.push("Új visszajelzés (ötlet / hiba): " + visszajelzes);
   if (jelentes) sorok.push("Nyitott jelentések: " + jelentes);
   const szoveg =
     "Teendő érkezett a GTA VI magyar térképre.\n\n" +

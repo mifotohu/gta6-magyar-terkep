@@ -805,6 +805,27 @@
     api.challenge().then(function (c) { kihivas = c; renderChallenge(); }).catch(function () { });
   }
 
+  /* --- visszajelzés (ötlet / hiba) --- */
+  if ($("fbSend")) {
+    $("fbSend").onclick = function () {
+      var b = this;
+      var szoveg = $("fbText").value.trim();
+      $("fbErr").textContent = "";
+      if (szoveg.length < 5) { $("fbErr").textContent = "Írj legalább pár szót."; return; }
+      b.disabled = true;
+      b.textContent = "Küldés…";
+      api.feedbackSubmit($("fbType").value, szoveg).then(function () {
+        $("fbBox").innerHTML = '<p class="note" style="color:#8af0c0">Köszönjük! Megkaptuk, és átnézzük. ' +
+          "Ha hibát jelentettél, igyekszünk javítani.</p>";
+        api.notify();
+      }).catch(function (err) {
+        $("fbErr").textContent = C.humanError(err);
+        b.disabled = false;
+        b.textContent = "Beküldöm";
+      });
+    };
+  }
+
   function reload() {
     return Promise.all([api.fans(), api.crews(), api.weekly(), api.mine(), api.proofMine()])
       .then(function (r) {

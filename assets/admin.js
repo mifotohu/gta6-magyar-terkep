@@ -147,7 +147,7 @@
   }
 
   var allFans = [], allCrews = [], allReports = [], allProofs = [], allBanners = [];
-  var allTips = [], allCh = [];
+  var allTips = [], allCh = [], allFb = [];
 
   function banner(msg) {
     $("banner").hidden = !msg;
@@ -158,16 +158,17 @@
     if (!key) { showGate(""); return; }
     Promise.all([api.adminReports(key), api.adminFans(key), api.adminCrews(key),
                  api.adminProofs(key), api.adminConfig(key), api.adminBanners(key),
-                 api.adminTips(key), api.adminChallenges(key)])
+                 api.adminTips(key), api.adminChallenges(key), api.adminFeedback(key)])
       .then(function (r) {
         allReports = r[0]; allFans = r[1]; allCrews = r[2]; allProofs = r[3];
-        allBanners = r[5]; allTips = r[6]; allCh = r[7];
+        allBanners = r[5]; allTips = r[6]; allCh = r[7]; allFb = r[8];
         fillConfig(r[4]);
         banner(null);
         render();
         renderBanners();
         renderTips();
         renderCh();
+        renderFb();
       })
       .catch(function (err) {
         var m = String(err && err.message || "");
@@ -181,9 +182,10 @@
     var reszek = [];
     if (allProofs.length) reszek.push(allProofs.length + " kép");
     if (varakozoTipp) reszek.push(varakozoTipp + " tipp");
+    if (allFb.length) reszek.push(allFb.length + " visszajelzés");
     if (allReports.length) reszek.push(allReports.length + " jelentés");
     $("sum").textContent = reszek.length ? reszek.join(" · ") + " vár rád" : "nincs nyitott teendő";
-    var teendo = allProofs.length + varakozoTipp + allReports.length;
+    var teendo = allProofs.length + varakozoTipp + allFb.length + allReports.length;
     $("secCount").textContent = teendo ? "(" + teendo + ")" : "";
 
     /* hitelesítésre váró képek */
@@ -249,6 +251,23 @@
         '<span class="acts"><button class="btn sm danger" data-del="' + esc(f.id) + '" type="button">Törlés</button></span>' +
         "</li>";
     }).join("") : '<li><span class="nm" style="font-weight:400;color:var(--muted)">Nincs találat.</span></li>';
+  }
+
+  /* --- visszajelzések (ötlet / hiba) --- */
+  function renderFb() {
+    $("fbCount").textContent = allFb.length ? "(" + allFb.length + ")" : "";
+    $("fbEmpty").hidden = allFb.length > 0;
+    $("fbList").innerHTML = allFb.map(function (f) {
+      var cimke = f.tipus === "hiba" ? "HIBA" : "ÖTLET";
+      var szin = f.tipus === "hiba" ? "#ff6b8a" : "#8af0c0";
+      return "<li>" +
+        '<span class="nm" style="white-space:normal">' +
+        '<span class="rank" style="color:' + szin + '">' + cimke + "</span> " +
+        esc(f.nick || "névtelen") + "<em>" + esc(when(f.created_at)) + "</em>" +
+        '<div class="said" style="white-space:pre-wrap">' + esc(f.szoveg) + "</div></span>" +
+        '<span class="acts"><button class="btn sm danger" data-fbdel="' + esc(f.id) + '" type="button">Törlés</button></span>' +
+        "</li>";
+    }).join("");
   }
 
   /* --- beküldött tippek --- */
@@ -414,9 +433,15 @@
   }
 
   document.addEventListener("click", function (e) {
-    var b = e.target.closest("button[data-del],button[data-delcrew],button[data-clear],button[data-proofok],button[data-proofno],button[data-bnedit],button[data-bnreset],button[data-bndel],button[data-tipok],button[data-tipno],button[data-tipdel],button[data-chdel]");
+    var b = e.target.closest("button[data-del],button[data-delcrew],button[data-clear],button[data-proofok],button[data-proofno],button[data-bnedit],button[data-bnreset],button[data-bndel],button[data-tipok],button[data-tipno],button[data-tipdel],button[data-chdel],button[data-fbdel]");
     if (!b || !key) return;
     var id;
+    if ((id = b.getAttribute("data-fbdel"))) {
+      arm(b, function () {
+        api.adminFeedbackDelete(key, id).then(load).catch(function (err) { banner(C.humanError(err)); });
+      });
+      return;
+    }
     if ((id = b.getAttribute("data-tipok"))) {
       b.disabled = true;
       api.adminTipDecide(key, id, true).then(load).catch(function (err) { b.disabled = false; banner(C.humanError(err)); });
