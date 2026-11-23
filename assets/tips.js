@@ -52,8 +52,7 @@
       return '<article class="tipcard">' +
         '<div class="vote">' +
         '<button class="vbtn' + (volt ? " done" : "") + '" data-vote="' + esc(t.id) + '" type="button" ' +
-        'aria-label="' + (volt ? "Már szavaztál erre" : "Hasznos tipp") + '" ' +
-        'title="' + (volt ? "Már szavaztál erre" : "Ez bevált nekem") + '">' + THUMB + "</button>" +
+        'aria-label="Hasznos tipp" title="Ez bevált nekem">' + THUMB + "</button>" +
         '<span class="vnum" id="v-' + esc(t.id) + '">' + nf(t.szavazat) + "</span>" +
         "</div>" +
         '<div><div class="txt">' + esc(t.szoveg) + "</div>" +
@@ -65,21 +64,22 @@
 
   $("list").addEventListener("click", function (e) {
     var b = e.target.closest("button[data-vote]");
-    if (!b) return;
+    if (!b || b.classList.contains("done")) return;
     var id = b.getAttribute("data-vote");
-    if (szavazott[id]) return;
     b.disabled = true;
+    /* mindig a szerver dönt: ő enged hálózatonként egy szavazatot */
     api.tipVote(id).then(function (uj) {
       jegyez(id);
       b.classList.add("done");
-      b.title = "Már szavaztál erre";
+      b.title = uj ? "Köszönjük a szavazatod!" : "Erről a hálózatról már szavaztak erre";
       if (uj) {
         var el = $("v-" + id);
         if (el) el.textContent = nf((Number(el.textContent.replace(/\s/g, "")) || 0) + 1);
       }
     }).catch(function (err) {
       banner(C.humanError(err));
-    }).then(function () { b.disabled = false; });
+      b.disabled = false;
+    });
   });
 
   function load() {

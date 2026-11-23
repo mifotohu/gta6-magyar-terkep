@@ -767,12 +767,11 @@
       var tobb = rows.length - mutat.length;
       box.innerHTML = mutat.map(function (t) {
         var sz = t.szoveg.length > 190 ? t.szoveg.slice(0, 190) + "…" : t.szoveg;
-        var volt = !!tipVoted[t.id];
         return '<div class="tiprow">' +
           '<div class="txt">' + esc(sz) +
           '<div class="who"><b>' + esc(C.katLabel(t.kategoria)) + "</b> · " + esc(t.nick) + "</div></div>" +
-          '<button class="tipvote' + (volt ? " done" : "") + '" data-tipvote="' + esc(t.id) + '" type="button" ' +
-          'aria-label="' + (volt ? "Már szavaztál" : "Hasznos tipp") + '" title="' + (volt ? "Már szavaztál erre" : "Ez bevált nekem") + '">' +
+          '<button class="tipvote" data-tipvote="' + esc(t.id) + '" type="button" ' +
+          'aria-label="Hasznos tipp" title="Ez bevált nekem">' +
           THUMB_SVG + '<span id="hv-' + esc(t.id) + '">' + nf(t.szavazat) + "</span></button>" +
           "</div>";
       }).join("") +
@@ -785,19 +784,18 @@
   /* szavazás a főoldali tippdobozból */
   $("tipsBox").addEventListener("click", function (e) {
     var b = e.target.closest("button[data-tipvote]");
-    if (!b) return;
+    if (!b || b.classList.contains("done")) return;
     var id = b.getAttribute("data-tipvote");
-    if (tipVoted[id]) return;
     b.disabled = true;
     api.tipVote(id).then(function (uj) {
       tipRememberVote(id);
       b.classList.add("done");
-      b.title = "Már szavaztál erre";
+      b.title = uj ? "Köszönjük a szavazatod!" : "Erről a hálózatról már szavaztak erre";
       if (uj) {
         var el = document.getElementById("hv-" + id);
         if (el) el.textContent = nf((Number(el.textContent.replace(/\s/g, "")) || 0) + 1);
       }
-    }).catch(function () { }).then(function () { b.disabled = false; });
+    }).catch(function () { b.disabled = false; });
   });
 
   function loadChallenge() {

@@ -58,20 +58,30 @@ h2.page{font-family:var(--display);font-size:clamp(24px,5vw,40px);margin:0 0 6px
   .promo{width:100%;max-width:360px;margin-top:4px}
 }
 
-/* statisztika */
+/* statisztika — a sor balról sötét lilából jobbra világos ciánig folyik át */
 .stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:26px 0 20px}
-.stat{min-width:0;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:linear-gradient(170deg,rgba(255,255,255,.07),rgba(255,255,255,.02))}
-.stat .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)}
-.stat .v{font-family:var(--display);font-size:clamp(19px,3vw,28px);line-height:1.1;margin-top:6px;font-variant-numeric:tabular-nums}
-.stat .v small{font-family:var(--body);font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0}
-.stat.a .v{color:var(--pink)}.stat.b .v{color:var(--orange)}.stat.c .v{color:var(--cyan)}
-.stat.d .v{font-size:clamp(15px,2.2vw,20px)}.stat.e .v{color:#8af0c0}
+.stat{min-width:0;border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:14px 16px}
+.stat .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.17em;text-transform:uppercase;color:rgba(255,255,255,.78)}
+.stat .v{font-family:var(--display);font-size:clamp(19px,3vw,28px);line-height:1.1;margin-top:6px;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.35)}
+.stat .v small{font-family:var(--body);font-size:13px;font-weight:600;color:rgba(255,255,255,.72);letter-spacing:0}
+.stat.d .v{font-size:clamp(15px,2.2vw,20px)}
+/* átmenetes színfolyam az 5 bokszon (DOM-sorrend szerint) */
+.stats .stat:nth-child(1){background:linear-gradient(160deg,rgba(120,40,230,.55),rgba(90,30,180,.30));border-color:rgba(139,59,255,.5)}
+.stats .stat:nth-child(2){background:linear-gradient(160deg,rgba(214,46,170,.55),rgba(150,35,150,.30));border-color:rgba(214,46,170,.5)}
+.stats .stat:nth-child(3){background:linear-gradient(160deg,rgba(255,74,120,.55),rgba(210,50,110,.30));border-color:rgba(255,74,120,.5)}
+.stats .stat:nth-child(4){background:linear-gradient(160deg,rgba(255,140,70,.55),rgba(240,110,70,.30));border-color:rgba(255,156,43,.55)}
+.stats .stat:nth-child(5){background:linear-gradient(160deg,rgba(80,220,205,.52),rgba(60,180,210,.28));border-color:rgba(45,226,230,.55)}
+.stats .stat:nth-child(5) .k,.stats .stat:nth-child(4) .k{color:rgba(10,4,24,.72)}
+.stats .stat:nth-child(5) .v,.stats .stat:nth-child(4) .v{color:#120024;text-shadow:none}
+.stats .stat:nth-child(5) .v small,.stats .stat:nth-child(4) .v small{color:rgba(10,4,24,.6)}
 
 /* elrendezés */
 .grid{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:18px;align-items:start}
-.panel{min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--card);backdrop-filter:blur(6px);box-shadow:0 24px 60px -32px rgba(0,0,0,.9)}
+.panel{position:relative;min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--card);backdrop-filter:blur(6px);box-shadow:0 24px 60px -32px rgba(0,0,0,.9)}
+/* vékony színcsík a panelek tetején, hogy ne legyen egyhangú */
+.panel::before{content:"";position:absolute;left:14px;right:14px;top:0;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--pink),var(--orange) 55%,var(--cyan));opacity:.85}
 .panel>header{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--line)}
-.panel h2{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:700}
+.panel h2{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin:0;font-weight:700}
 .pad{padding:16px}
 .side{display:flex;flex-direction:column;gap:18px}
 
