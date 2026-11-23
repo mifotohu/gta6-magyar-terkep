@@ -2,3 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 Disallow: /embed.html
+Disallow: /banner.html
+
+Sitemap: https://gta6-magyar-terkep.vercel.app/sitemap.xml

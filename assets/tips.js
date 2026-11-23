@@ -5,8 +5,35 @@
   var $ = function (id) { return document.getElementById(id); };
   var esc = C.esc, nf = C.nf;
 
-  var kat = "";
+  /* kategória a ?kat= paraméterből, hogy minden kategória külön, megosztható URL legyen */
+  var ervenyesKat = C.KATEGORIAK.map(function (k) { return k[0]; });
+  var kat = (function () {
+    try {
+      var p = new URLSearchParams(location.search).get("kat");
+      return (p && ervenyesKat.indexOf(p) >= 0) ? p : "";
+    } catch (e) { return ""; }
+  })();
   var tips = [];
+  var kereses = "";
+
+  /* a böngésző címét és a főcímet a kategóriához igazítjuk (SEO + megoszthatóság) */
+  function cimFrissit() {
+    var nev = C.katLabel(kat);
+    if (kat) {
+      document.title = "GTA VI tippek – " + nev + " | Magyar térkép";
+      $("tipTitle").textContent = nev + " — GTA VI tippek";
+      $("tipLede").innerHTML = "A magyar közösség <strong>" + esc(nev.toLowerCase()) +
+        "</strong> tippjei. Szavazz arra, ami bevált, vagy küldd be a sajátodat.";
+    } else {
+      document.title = "Tippek — GTA VI Magyar Térkép";
+      $("tipTitle").textContent = "Tippek a játékosoktól";
+      $("tipLede").innerHTML = "Amit a magyar közösség összeszedett — <strong>nem a kiadó, nem egy szerkesztőség</strong>, hanem azok, akik tolják. Szavazz arra, ami bevált, és küldd be a sajátodat.";
+    }
+    try {
+      var u = kat ? (location.pathname + "?kat=" + kat) : location.pathname;
+      history.replaceState(null, "", u);
+    } catch (e) { }
+  }
 
   /* amire már szavaztam ebből a böngészőből */
   var szavazott = (function () {
@@ -35,8 +62,21 @@
     if (!b) return;
     kat = b.getAttribute("data-kat");
     renderChips();
+    cimFrissit();
     load();
   });
+
+  /* keresés a betöltött tippek közt */
+  $("tipSearch").addEventListener("input", function () {
+    kereses = this.value.trim().toLowerCase();
+    render();
+  });
+  function szurt() {
+    if (!kereses) return tips;
+    return tips.filter(function (t) {
+      return (t.szoveg + " " + t.nick + " " + C.katLabel(t.kategoria)).toLowerCase().indexOf(kereses) >= 0;
+    });
+  }
 
   function datum(s) {
     try { return new Date(s).toLocaleDateString("hu-HU", { month: "short", day: "numeric" }); }
@@ -46,8 +86,9 @@
   var THUMB = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
     '<path fill="currentColor" d="M2 9.6h3.2V21H2zM22 11c0-1.1-.9-2-2-2h-5.4l.8-3.9v-.2c0-.4-.2-.8-.5-1.1l-.9-.9-5.3 5.3c-.4.4-.6.9-.6 1.4v8c0 1.1.9 2 2 2h7.3c.8 0 1.5-.5 1.8-1.2l2.4-5.7c.1-.2.1-.4.1-.6z"/></svg>';
   function render() {
-    $("empty").hidden = tips.length > 0;
-    $("list").innerHTML = tips.map(function (t) {
+    var lista = szurt();
+    $("empty").hidden = lista.length > 0;
+    $("list").innerHTML = lista.map(function (t) {
       var volt = !!szavazott[t.id];
       return '<article class="tipcard">' +
         '<div class="vote">' +
@@ -147,6 +188,7 @@
   }
 
   renderChips();
+  cimFrissit();
   load();
   sajatok();
 })(window);

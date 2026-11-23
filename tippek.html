@@ -27,10 +27,15 @@
 <body>
 <div class="wrap">
   <p class="eyebrow"><b>GTA VI</b> · Magyar rajongói térkép</p>
-  <h2 class="page">Tippek a játékosoktól</h2>
-  <p class="lede">Amit a magyar közösség összeszedett — <strong>nem a kiadó, nem egy szerkesztőség</strong>, hanem azok, akik tolják. Szavazz arra, ami bevált, és küldd be a sajátodat.</p>
+  <h2 class="page" id="tipTitle">Tippek a játékosoktól</h2>
+  <p class="lede" id="tipLede">Amit a magyar közösség összeszedett — <strong>nem a kiadó, nem egy szerkesztőség</strong>, hanem azok, akik tolják. Szavazz arra, ami bevált, és küldd be a sajátodat.</p>
 
   <div class="banner" id="banner" hidden></div>
+
+  <div style="margin:16px 0 6px">
+    <input type="search" id="tipSearch" placeholder="Keresés a tippek közt…" autocomplete="off"
+      style="width:100%;max-width:420px;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.4);color:var(--fg);font-family:var(--body);font-size:14.5px">
+  </div>
 
   <div class="chips" id="chips"></div>
 
